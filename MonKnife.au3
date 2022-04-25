@@ -3,8 +3,9 @@
 #include "Functions\Storage\AppConstant.au3"
 #include "Functions\Storage\AppSetting.au3"
 #include "Functions\Storage\AppState.au3"
-#include "Functions\Utility.au3"
 #include "Functions\NotificationHelper.au3"
+#include "Functions\WndHelper.au3"
+#include "Functions\BattleControl.au3"
 #include "Functions\ScreenCapturing.au3"
 
 mknAppSettingInit(@ScriptDir & "\MonKnife.ini")
@@ -35,7 +36,7 @@ EndFunc
 Func _scanBattleScreenCtl(Const $hnwd)
 	mknStateSet($APP_BATTLE_BEGIN, False)
 	mknStateSet($APP_BATTLE_END, False)
-	Local $battleScreen = _captureScreenBattle($hnwd)
+	Local $battleScreen = mknBattleIsDisplayed($hnwd)
 	If $battleScreen Then
 		; Dispatch state battle.on to env when battle dialog displayed on screen
 		If Not mknStateGet($APP_IN_BATTLE) Then

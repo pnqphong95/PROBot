@@ -15,6 +15,11 @@ $mknAppSettings.Add($APP_ACTION_3, "C")
 $mknAppSettings.Add($APP_ACTION_4, "V")
 $mknAppSettings.Add($APP_ACTION_5, "B")
 $mknAppSettings.Add($APP_ACTION_6, "N")
+$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_X, 380)
+$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_Y, 155)
+$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_W, 620)
+$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_H, 5)
+$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_COLOR, "0x282528")
 
 
 ; Functions to handle $mknAppSetting dictionary

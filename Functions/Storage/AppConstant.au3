@@ -1,5 +1,6 @@
 #include-once
 
+; App Setting Keys, must change corresponding value in MonKnife.ini if modify these values
 Global Const $APP_TITLE = "app.title"
 Global Const $APP_NOTIFICATION_ENABLE = "app.game.notification.enable"
 Global Const $APP_NOTIFICATION_TELEGRAM_CHAT_ID = "app.game.notification.telegram.chatid"
@@ -10,7 +11,13 @@ Global Const $APP_ACTION_3 = "app.game.action3"
 Global Const $APP_ACTION_4 = "app.game.action4"
 Global Const $APP_ACTION_5 = "app.game.action5"
 Global Const $APP_ACTION_6 = "app.game.action6"
+Global Const $APP_BATTLE_IDENTIFIER_X = "app.game.battle.identifier.x"
+Global Const $APP_BATTLE_IDENTIFIER_Y = "app.game.battle.identifier.y"
+Global Const $APP_BATTLE_IDENTIFIER_W = "app.game.battle.identifier.w"
+Global Const $APP_BATTLE_IDENTIFIER_H = "app.game.battle.identifier.h"
+Global Const $APP_BATTLE_IDENTIFIER_COLOR = "app.game.battle.identifier.color"
 
+; App State Keys
 Global Const $APP_SESSION_TIME = "app.game.session.time"
 Global Const $APP_IN_BATTLE = "app.game.battle.on"
 Global Const $APP_BATTLE_BEGIN = "app.game.battle.switchon"
@@ -25,7 +32,6 @@ Global Const $APP_BATTLE_CONTROLLER_STATE = "app.game.battle.controller.state"
 Global Const $APP_BATTLE_CONTROLLER_STATE_FIGHT = "app.game.battle.controller.state.fight"
 Global Const $APP_BATTLE_CONTROLLER_STATE_POKEMON = "app.game.battle.controller.state.pokemon"
 Global Const $APP_BATTLE_CONTROLLER_STATE_ITEM = "app.game.battle.controller.state.item"
-
 Global Const $APP_IN_SPAWN = "app.game.spawn.on"
 Global Const $APP_SPAWN_LAST_DIRECTION = "app.game.spawn.lastdirection"
 Global Const $APP_SPAWN_LAST_PRESS = "app.game.spawn.lastpress"

@@ -1,30 +1,6 @@
 #include-once
-#include "Tesseract.au3"
-#include "Utility.au3"
-#cs ----------------------------------------------------------------------------
-
- Version: 0.1.0
- AutoIt Version: 3.3.16.0
- Author: pnqphong95
-
- Script Function:
-	Capture, record the information from the game screen.
-
-#ce ----------------------------------------------------------------------------
-Func _captureScreenBattle($hnwd)
-	If IsHWnd($hnwd) Then
-		; Sets the way coords are used in the pixel search functions.
-		; 2 =  relative coords to the client area of the defined window.
-		activateWindow($hnwd)
-		Opt("PixelCoordMode", 2)
-		Local $battleDialogColor = 0x282528
-		Local $left = 380, $top = 155, $right = 1000, $bottom = 160
-		Local $battleDialogCoor = PixelSearch($left, $top, $right, $bottom, $battleDialogColor, 1, 1, $hnwd)
-		Return Not @error
-	EndIf
-	Return False
-EndFunc
-
+#include "Libs\Tesseract.au3"
+#include "WndHelper.au3"
 Func pro_isBattleControlFree($hnwd)
 	If IsHWnd($hnwd) Then
 		; Sets the way coords are used in the pixel search functions.
