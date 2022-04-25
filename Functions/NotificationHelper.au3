@@ -8,7 +8,7 @@ EndFunc
 
 Func pro_SendMessage(Const $message)
 	If $message <> "" Then
-		Local $chatId = ''
+		Local $chatId = ""
 	    Local $botToken = ""
 		If $chatId <> "" And $botToken <> "" Then
 			pro_SendTelegramMessage($chatId, $botToken, $message, True)

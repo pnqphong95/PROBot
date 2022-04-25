@@ -25,6 +25,20 @@ Func _captureScreenBattle($hnwd)
 	Return False
 EndFunc
 
+Func pro_isBattleControlFree($hnwd)
+	If IsHWnd($hnwd) Then
+		; Sets the way coords are used in the pixel search functions.
+		; 2 =  relative coords to the client area of the defined window.
+		activateWindow($hnwd)
+		Opt("PixelCoordMode", 2)
+		Local $controlFreeColor = 0x8f8f8f
+		Local $left = 920, $top = 575, $right = 922, $bottom = 576
+		Local $controlFreeCoor = PixelSearch($left, $top, $right, $bottom, $controlFreeColor, 2, 1, $hnwd)
+		Return Not @error
+	EndIf
+	Return False
+EndFunc
+
 Func _captureBattleTitle($hnwd)
 	If IsHWnd($hnwd) Then
 		_TesseractTempPathSet(@TempDir & "\")
