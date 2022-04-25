@@ -20,24 +20,24 @@
 					Tesseract 2.01.
 	Changelog:		---------15/02/09---------- v0.1
 					Initial release.
-					
+
 					---------15/02/09---------- v0.2
 					Changed path to tesseract.exe to @ProgramFilesDir.
 					Added scaling as input to _TesseractCapture.
 					Fixed indentation.
 					Changed CaptureHWNDToTIFF to input window and control IDs.
-					
+
 					---------16/02/09---------- v0.3
 					Added the parameter $get_last_capture to _TesseractCapture.
 					Added the parameter $show_capture to _TesseractCapture.
-					
+
 					---------16/02/09---------- v0.4
 					Added the function _TesseractFind.
-					
+
 					---------21/02/09---------- v0.5
 					Updated _TesseractCapture to remove a listbox selection entirely,
 						and return it after the text capture is done.
-					
+
 					---------17/03/09---------- v0.6
 					Split the function "_TesseractCapture" into 3 functions:
 						_TesseractScreenCapture
@@ -67,20 +67,20 @@ Global $tesseract_temp_path = "C:\"
 ; Syntax.........:	_TesseractTempPathSet($temp_path)
 ; Parameters ....:	$temp_path	- The path to use for temporary file storage.
 ;									This path must not contain any spaces (see "Remarks" below).
-; Return values .: 	On Success	- Returns 1. 
+; Return values .: 	On Success	- Returns 1.
 ;                 	On Failure	- Returns 0.
 ; Author ........:	seangriffin
-; Modified.......: 
+; Modified.......:
 ; Remarks .......:	The current version of Tesseract doesn't support paths with spaces.
-; Related .......: 
-; Link ..........: 
+; Related .......:
+; Link ..........:
 ; Example .......:	No
 ;
 ; ;==========================================================================================
 func _TesseractTempPathSet($temp_path)
 
 	$tesseract_temp_path = $temp_path
-	
+
 	Return 1
 EndFunc
 
@@ -116,10 +116,10 @@ EndFunc
 ;											(for debugging purposes).
 ;											0 = do not display the screenshot taken (default)
 ;											1 = display the screenshot taken and exit
-; Return values .: 	On Success	- Returns an array of text that was captured. 
+; Return values .: 	On Success	- Returns an array of text that was captured.
 ;                 	On Failure	- Returns an empty array.
 ; Author ........:	seangriffin
-; Modified.......: 
+; Modified.......:
 ; Remarks .......:	Use the default values for first time use.  If the text recognition accuracy is low,
 ;					I suggest setting $show_capture to 1 and rerunning.  If the screenshot of the
 ;					window or control includes borders or erroneous pixels that may interfere with
@@ -128,8 +128,8 @@ EndFunc
 ;					exclude these non-textural elements.
 ;					If text accuracy is still low, increase the $scale parameter.  In general, the higher
 ;					the scale the clearer the font and the more accurate the text recognition.
-; Related .......: 
-; Link ..........: 
+; Related .......:
+; Link ..........:
 ; Example .......:	No
 ;
 ; ;==========================================================================================
@@ -148,7 +148,7 @@ func _TesseractScreenCapture($get_last_capture = 0, $delimiter = "", $cleanup = 
 
 	; if last capture is requested, and one exists.
 	if $get_last_capture = 1 and $last_capture.item(0) <> "" Then
-		
+
 		return $last_capture.item(0)
 	EndIf
 
@@ -157,15 +157,15 @@ func _TesseractScreenCapture($get_last_capture = 0, $delimiter = "", $cleanup = 
 	$ocr_filename_and_ext = $ocr_filename & ".txt"
 
 	CaptureToTIFF("", "", "", $capture_filename, $scale, $left_indent, $top_indent, $right_indent, $bottom_indent)
-	
-	ShellExecuteWait(@ProgramFilesDir & "\tesseract\tesseract.exe", $capture_filename & " " & $ocr_filename)
+
+	ShellExecuteWait(@ProgramFilesDir & "\Tesseract-OCR\tesseract.exe", $capture_filename & " " & $ocr_filename)
 
 	; If no delimter specified, then return a string
 	if StringCompare($delimiter, "") = 0 Then
-		
+
 		$final_ocr = FileRead($ocr_filename_and_ext)
 	Else
-	
+
 		_FileReadToArray($ocr_filename_and_ext, $aArray)
 		_ArrayDelete($aArray, 0)
 
@@ -175,22 +175,22 @@ func _TesseractScreenCapture($get_last_capture = 0, $delimiter = "", $cleanup = 
 
 	; If the captures are to be displayed
 	if $show_capture = 1 Then
-	
+
 		GUICreate("Tesseract Screen Capture.  Note: image displayed is not to scale", 640, 480, 0, 0, $WS_SIZEBOX + $WS_SYSMENU)  ; will create a dialog box that when displayed is centered
 
 		GUISetBkColor(0xE0FFFF)
 
-		$Obj1 = ObjCreate("Preview.Preview.1")  
+		$Obj1 = ObjCreate("Preview.Preview.1")
 		$Obj1_ctrl = GUICtrlCreateObj($Obj1, 0, 0, 640, 480)
 		$Obj1.ShowFile ($capture_filename, 1)
 
 		GUISetState()
 
 		if IsArray($final_ocr) Then
-		
+
 			_ArrayDisplay($aArray, "Tesseract Text Capture")
 		Else
-			
+
 			MsgBox(0, "Tesseract Text Capture", $final_ocr)
 		EndIf
 
@@ -214,20 +214,20 @@ func _TesseractScreenCapture($get_last_capture = 0, $delimiter = "", $cleanup = 
 
 		; Remove duplicate and blank items
 		for $each in $final_ocr
-		
+
 			$found_item = _ArrayFindAll($final_ocr, $each)
-			
+
 			; Remove blank items
 			if IsArray($found_item) Then
 				if StringCompare($final_ocr[$found_item[0]], "") = 0 Then
-					
+
 					_ArrayDelete($final_ocr, $found_item[0])
 				EndIf
 			EndIf
 
 			; Remove duplicate items
 			for $found_item_num = 2 to UBound($found_item)
-				
+
 				_ArrayDelete($final_ocr, $found_item[$found_item_num-1])
 			Next
 		Next
@@ -235,7 +235,7 @@ func _TesseractScreenCapture($get_last_capture = 0, $delimiter = "", $cleanup = 
 
 	; Store a copy of the capture
 	if $last_capture.item(0) = "" Then
-			
+
 		$last_capture.item(0) = $final_ocr
 	EndIf
 
@@ -276,10 +276,10 @@ EndFunc
 ;											(for debugging purposes).
 ;											0 = do not display the screenshot taken (default)
 ;											1 = display the screenshot taken and exit
-; Return values .: 	On Success	- Returns an array of text that was captured. 
+; Return values .: 	On Success	- Returns an array of text that was captured.
 ;                 	On Failure	- Returns an empty array.
 ; Author ........:	seangriffin
-; Modified.......: 
+; Modified.......:
 ; Remarks .......:	Use the default values for first time use.  If the text recognition accuracy is low,
 ;					I suggest setting $show_capture to 1 and rerunning.  If the screenshot of the
 ;					window or control includes borders or erroneous pixels that may interfere with
@@ -288,8 +288,8 @@ EndFunc
 ;					exclude these non-textural elements.
 ;					If text accuracy is still low, increase the $scale parameter.  In general, The higher
 ;					the scale the clearer the font and the more accurate the text recognition.
-; Related .......: 
-; Link ..........: 
+; Related .......:
+; Link ..........:
 ; Example .......:	No
 ;
 ; ;==========================================================================================
@@ -310,7 +310,7 @@ func _TesseractWinCapture($win_title, $win_text = "", $get_last_capture = 0, $de
 
 	; if last capture is requested, and one exists.
 	if $get_last_capture = 1 and $last_capture.item(Number($hwnd)) <> "" Then
-		
+
 		return $last_capture.item(Number($hwnd))
 	EndIf
 
@@ -321,15 +321,15 @@ func _TesseractWinCapture($win_title, $win_text = "", $get_last_capture = 0, $de
 	$ocr_filename_and_ext = $ocr_filename & ".txt"
 
 	CaptureToTIFF($win_title, $win_text, "", $capture_filename, $scale, $left_indent, $top_indent, $right_indent, $bottom_indent)
-	
-	ShellExecuteWait(@ProgramFilesDir & "\tesseract\tesseract.exe", $capture_filename & " " & $ocr_filename)
+
+	ShellExecuteWait(@ProgramFilesDir & "\Tesseract-OCR\tesseract.exe", $capture_filename & " " & $ocr_filename, "", "", @SW_HIDE)
 
 	; If no delimter specified, then return a string
 	if StringCompare($delimiter, "") = 0 Then
-		
+
 		$final_ocr = FileRead($ocr_filename_and_ext)
 	Else
-	
+
 		_FileReadToArray($ocr_filename_and_ext, $aArray)
 		_ArrayDelete($aArray, 0)
 
@@ -339,22 +339,22 @@ func _TesseractWinCapture($win_title, $win_text = "", $get_last_capture = 0, $de
 
 	; If the captures are to be displayed
 	if $show_capture = 1 Then
-	
+
 		GUICreate("Tesseract Screen Capture.  Note: image displayed is not to scale", 640, 480, 0, 0, $WS_SIZEBOX + $WS_SYSMENU)  ; will create a dialog box that when displayed is centered
 
 		GUISetBkColor(0xE0FFFF)
 
-		$Obj1 = ObjCreate("Preview.Preview.1")  
+		$Obj1 = ObjCreate("Preview.Preview.1")
 		$Obj1_ctrl = GUICtrlCreateObj($Obj1, 0, 0, 640, 480)
 		$Obj1.ShowFile ($capture_filename, 1)
 
 		GUISetState()
 
 		if IsArray($final_ocr) Then
-		
+
 			_ArrayDisplay($aArray, "Tesseract Text Capture")
 		Else
-			
+
 			MsgBox(0, "Tesseract Text Capture", $final_ocr)
 		EndIf
 
@@ -378,20 +378,20 @@ func _TesseractWinCapture($win_title, $win_text = "", $get_last_capture = 0, $de
 
 		; Remove duplicate and blank items
 		for $each in $final_ocr
-		
+
 			$found_item = _ArrayFindAll($final_ocr, $each)
-			
+
 			; Remove blank items
 			if IsArray($found_item) Then
 				if StringCompare($final_ocr[$found_item[0]], "") = 0 Then
-					
+
 					_ArrayDelete($final_ocr, $found_item[0])
 				EndIf
 			EndIf
 
 			; Remove duplicate items
 			for $found_item_num = 2 to UBound($found_item)
-				
+
 				_ArrayDelete($final_ocr, $found_item[$found_item_num-1])
 			Next
 		Next
@@ -399,7 +399,7 @@ func _TesseractWinCapture($win_title, $win_text = "", $get_last_capture = 0, $de
 
 	; Store a copy of the capture
 	if $last_capture.item(Number($hwnd)) = "" Then
-			
+
 		$last_capture.item(Number($hwnd)) = $final_ocr
 	EndIf
 
@@ -452,10 +452,10 @@ EndFunc
 ;											(for debugging purposes).
 ;											0 = do not display the screenshot taken (default)
 ;											1 = display the screenshot taken and exit
-; Return values .: 	On Success	- Returns an array of text that was captured. 
+; Return values .: 	On Success	- Returns an array of text that was captured.
 ;                 	On Failure	- Returns an empty array.
 ; Author ........:	seangriffin
-; Modified.......: 
+; Modified.......:
 ; Remarks .......:	Use the default values for first time use.  If the text recognition accuracy is low,
 ;					I suggest setting $show_capture to 1 and rerunning.  If the screenshot of the
 ;					window or control includes borders or erroneous pixels that may interfere with
@@ -464,8 +464,8 @@ EndFunc
 ;					exclude these non-textural elements.
 ;					If text accuracy is still low, increase the $scale parameter.  In general, The higher
 ;					the scale the clearer the font and the more accurate the text recognition.
-; Related .......: 
-; Link ..........: 
+; Related .......:
+; Link ..........:
 ; Example .......:	Yes
 ;
 ; ;==========================================================================================
@@ -496,7 +496,7 @@ func _TesseractControlCapture($win_title, $win_text = "", $ctrl_id = "", $get_la
 
 				$hwnd = DllStructGetData($tInfo, "hList")
 			EndIf
-		
+
 			; Expand the control.
 			_GUICtrlComboBox_ShowDropDown($hwnd2, True)
 		EndIf
@@ -504,7 +504,7 @@ func _TesseractControlCapture($win_title, $win_text = "", $ctrl_id = "", $get_la
 
 	; if last capture is requested, and one exists.
 	if $get_last_capture = 1 and $last_capture.item(Number($hwnd)) <> "" Then
-		
+
 		return $last_capture.item(Number($hwnd))
 	EndIf
 
@@ -524,7 +524,7 @@ func _TesseractControlCapture($win_title, $win_text = "", $ctrl_id = "", $get_la
 	for $i = 1 to $max_scroll_times
 
 		if $i > 1 Then
-			
+
 			; Scroll the list down one page
 			DllCall("user32.dll", "int", "SendMessage", "hwnd", $hwnd, "int", $WM_VSCROLL, "int", $SB_PAGEDOWN, "int", 0)
 
@@ -533,10 +533,10 @@ func _TesseractControlCapture($win_title, $win_text = "", $ctrl_id = "", $get_la
 		; Get the position of the scroll bar
 		DllCall("user32.dll", "int", "GetScrollInfo", "hwnd", $hwnd, "int", $SB_VERT, "ptr", DllStructGetPtr($tSCROLLINFO))
 		$xyPos = DllStructGetData($tSCROLLINFO, "nPos")
-		
+
 		; If the scroll bar hasn't moved, we have finished scrolling
 		if $xyPos_old = $xyPos then ExitLoop
-		
+
 		$xyPos_old = $xyPos
 
 		; Perform the text recognition
@@ -547,22 +547,22 @@ func _TesseractControlCapture($win_title, $win_text = "", $ctrl_id = "", $get_la
 		$ocr_filename_and_ext = $ocr_filename & ".txt"
 
 		CaptureToTIFF($win_title, $win_text, $hwnd, $capture_filename, $scale, $left_indent, $top_indent, $right_indent, $bottom_indent)
-		
-		ShellExecuteWait(@ProgramFilesDir & "\tesseract\tesseract.exe", $capture_filename & " " & $ocr_filename)
+
+		ShellExecuteWait(@ProgramFilesDir & "\Tesseract-OCR\tesseract.exe", $capture_filename & " " & $ocr_filename)
 
 		; Return the current selection (if one existed)
 		if $sel_index > -1 Then
-		
+
 			_GUICtrlListBox_SetCurSel($hwnd, $sel_index)
 		EndIf
 
 		; If no delimter specified, then return a string
 		if StringCompare($delimiter, "") = 0 Then
-			
+
 			$final_ocr = FileRead($ocr_filename_and_ext)
 			$i = $max_scroll_times
 		Else
-		
+
 			_FileReadToArray($ocr_filename_and_ext, $aArray)
 			_ArrayDelete($aArray, 0)
 
@@ -572,22 +572,22 @@ func _TesseractControlCapture($win_title, $win_text = "", $ctrl_id = "", $get_la
 
 		; If the captures are to be displayed
 		if $show_capture = 1 Then
-		
+
 			GUICreate("Tesseract Screen Capture.  Note: image displayed is not to scale", 640, 480, 0, 0, $WS_SIZEBOX + $WS_SYSMENU)  ; will create a dialog box that when displayed is centered
 
 			GUISetBkColor(0xE0FFFF)
 
-			$Obj1 = ObjCreate("Preview.Preview.1")  
+			$Obj1 = ObjCreate("Preview.Preview.1")
 			$Obj1_ctrl = GUICtrlCreateObj($Obj1, 0, 0, 640, 480)
 			$Obj1.ShowFile ($capture_filename, 1)
 
 			GUISetState()
 
 			if IsArray($final_ocr) Then
-			
+
 				_ArrayDisplay($aArray, "Tesseract Text Capture")
 			Else
-				
+
 				MsgBox(0, "Tesseract Text Capture", $final_ocr)
 			EndIf
 
@@ -612,20 +612,20 @@ func _TesseractControlCapture($win_title, $win_text = "", $ctrl_id = "", $get_la
 
 		; Remove duplicate and blank items
 		for $each in $final_ocr
-		
+
 			$found_item = _ArrayFindAll($final_ocr, $each)
-			
+
 			; Remove blank items
 			if IsArray($found_item) Then
 				if StringCompare($final_ocr[$found_item[0]], "") = 0 Then
-					
+
 					_ArrayDelete($final_ocr, $found_item[0])
 				EndIf
 			EndIf
 
 			; Remove duplicate items
 			for $found_item_num = 2 to UBound($found_item)
-				
+
 				_ArrayDelete($final_ocr, $found_item[$found_item_num-1])
 			Next
 		Next
@@ -633,7 +633,7 @@ func _TesseractControlCapture($win_title, $win_text = "", $ctrl_id = "", $get_la
 
 	; Store a copy of the capture
 	if $last_capture.item(Number($hwnd)) = "" Then
-			
+
 		$last_capture.item(Number($hwnd)) = $final_ocr
 	EndIf
 
@@ -683,10 +683,10 @@ EndFunc
 ;												text was found is returned.
 ;                 	On Failure			- Returns an empty array.
 ; Author ........:	seangriffin
-; Modified.......: 
-; Remarks .......:	
-; Related .......: 
-; Link ..........: 
+; Modified.......:
+; Remarks .......:
+; Related .......:
+; Link ..........:
 ; Example .......:	No
 ;
 ; ;==========================================================================================
@@ -696,20 +696,20 @@ func _TesseractScreenFind($find_str = "", $partial = 1, $get_last_capture = 0, $
 	$recognised_text = _TesseractScreenCapture($get_last_capture, $delimiter, $cleanup, $scale, $left_indent, $top_indent, $right_indent, $bottom_indent, $show_capture)
 
 	if IsArray($recognised_text) Then
-		
+
 		$index_found = _ArraySearch($recognised_text, $find_str, 0, 0, 0, $partial)
 	Else
-		
+
 		if $partial = 1 Then
-			
+
 			$index_found = StringInStr($recognised_text, $find_str)
 		Else
-			
+
 			if StringCompare($recognised_text, $find_str) = 0 Then
-				
+
 				$index_found = 1
 			Else
-				
+
 				$index_found = 0
 			EndIf
 		EndIf
@@ -763,10 +763,10 @@ EndFunc
 ;												text was found is returned.
 ;                 	On Failure			- Returns an empty array.
 ; Author ........:	seangriffin
-; Modified.......: 
-; Remarks .......:	
-; Related .......: 
-; Link ..........: 
+; Modified.......:
+; Remarks .......:
+; Related .......:
+; Link ..........:
 ; Example .......:	No
 ;
 ; ;==========================================================================================
@@ -776,20 +776,20 @@ func _TesseractWinFind($win_title, $win_text = "", $find_str = "", $partial = 1,
 	$recognised_text = _TesseractWinCapture($win_title, $win_text, $get_last_capture, $delimiter, $cleanup, $scale, $left_indent, $top_indent, $right_indent, $bottom_indent, $show_capture)
 
 	if IsArray($recognised_text) Then
-		
+
 		$index_found = _ArraySearch($recognised_text, $find_str, 0, 0, 0, $partial)
 	Else
-		
+
 		if $partial = 1 Then
-			
+
 			$index_found = StringInStr($recognised_text, $find_str)
 		Else
-			
+
 			if StringCompare($recognised_text, $find_str) = 0 Then
-				
+
 				$index_found = 1
 			Else
-				
+
 				$index_found = 0
 			EndIf
 		EndIf
@@ -855,10 +855,10 @@ EndFunc
 ;												text was found is returned.
 ;                 	On Failure			- Returns an empty array.
 ; Author ........:	seangriffin
-; Modified.......: 
-; Remarks .......:	
-; Related .......: 
-; Link ..........: 
+; Modified.......:
+; Remarks .......:
+; Related .......:
+; Link ..........:
 ; Example .......:	Yes
 ;
 ; ;==========================================================================================
@@ -868,20 +868,20 @@ func _TesseractControlFind($win_title, $win_text = "", $ctrl_id = "", $find_str 
 	$recognised_text = _TesseractControlCapture($win_title, $win_text, $ctrl_id, $get_last_capture, $delimiter, $expand, $scrolling, $cleanup, $max_scroll_times, $scale, $left_indent, $top_indent, $right_indent, $bottom_indent, $show_capture)
 
 	if IsArray($recognised_text) Then
-		
+
 		$index_found = _ArraySearch($recognised_text, $find_str, 0, 0, 0, $partial)
 	Else
-		
+
 		if $partial = 1 Then
-			
+
 			$index_found = StringInStr($recognised_text, $find_str)
 		Else
-			
+
 			if StringCompare($recognised_text, $find_str) = 0 Then
-				
+
 				$index_found = 1
 			Else
-				
+
 				$index_found = 0
 			EndIf
 		EndIf
@@ -911,10 +911,10 @@ EndFunc
 ;										bottom of the window or control.
 ; Return values .: 	None
 ; Author ........:	seangriffin
-; Modified.......: 
-; Remarks .......:	
-; Related .......: 
-; Link ..........: 
+; Modified.......:
+; Remarks .......:
+; Related .......:
+; Link ..........:
 ; Example .......:	No
 ;
 ; ;==========================================================================================
@@ -927,18 +927,14 @@ Func CaptureToTIFF($win_title = "", $win_text = "", $ctrl_id = "", $sOutImage = 
 
 	; If capturing a control
 	if StringCompare($ctrl_id, "") <> 0 Then
-
 		$hwnd2 = ControlGetHandle($win_title, $win_text, $ctrl_id)
 		$pos = ControlGetPos($win_title, $win_text, $ctrl_id)
 	Else
-		
 		; If capturing a window
 		if StringCompare($win_title, "") <> 0 Then
-
 			$hwnd2 = WinGetHandle($win_title, $win_text)
 			$pos = WinGetPos($win_title, $win_text)
 		Else
-			
 			; If capturing the desktop
 			$hwnd2 = ""
 			$pos[0] = 0
@@ -947,25 +943,24 @@ Func CaptureToTIFF($win_title = "", $win_text = "", $ctrl_id = "", $sOutImage = 
 			$pos[3] = @DesktopHeight
 		EndIf
 	EndIf
-	
+
 	; Capture an image of the window / control
 	if IsHWnd($hwnd2) Then
-	
 		WinActivate($win_title, $win_text)
 		$hBitmap2 = _ScreenCapture_CaptureWnd("", $hwnd2, 0, 0, -1, -1, False)
 	Else
-		
 		$hBitmap2 = _ScreenCapture_Capture("", 0, 0, -1, -1, False)
 	EndIf
 
 	_GDIPlus_Startup ()
-	
+
 	; Convert the image to a bitmap
 	$hImage2 = _GDIPlus_BitmapCreateFromHBITMAP ($hBitmap2)
-
+	Local $scaledWidth = (($right_indent - $left_indent) * $scale)
+	Local $scaledHeight = (($bottom_indent - $top_indent) * $scale)
 	$hWnd = _WinAPI_GetDesktopWindow()
     $hDC = _WinAPI_GetDC($hWnd)
-    $hBMP = _WinAPI_CreateCompatibleBitmap($hDC, ($pos[2] * $scale) - ($right_indent * $scale), ($pos[3] * $scale) - ($bottom_indent * $scale))
+    $hBMP = _WinAPI_CreateCompatibleBitmap($hDC, $scaledWidth, $scaledHeight)
 
 	_WinAPI_ReleaseDC($hWnd, $hDC)
     $hImage1 = _GDIPlus_BitmapCreateFromHBITMAP ($hBMP)
