@@ -1,22 +1,27 @@
 #include-once
+#include "Storage\AppConstant.au3"
+#include "Storage\AppSetting.au3"
 
-Func pro_NotifyPokemon(Const $pokemon)
+Func mknNotifyPokemonFound(Const $pokemon)
     If $pokemon <> "" Then
-        pro_SendMessage('Yayy! Found one ' & $pokemon)
+        mknSendMessage('Yayy! Found one ' & $pokemon)
     EndIf
 EndFunc
 
-Func pro_SendMessage(Const $message)
-	If $message <> "" Then
-		Local $chatId = ""
-	    Local $botToken = ""
+Func mknSendMessage(Const $message)
+	Local $enable = mknAppSettingGet($APP_NOTIFICATION_ENABLE)
+	If $enable = 1 And $message <> "" Then
+		Local $chatId = mknAppSettingGet($APP_NOTIFICATION_TELEGRAM_CHAT_ID)
+	    Local $botToken = mknAppSettingGet($APP_NOTIFICATION_TELEGRAM_BOT_TOKEN)
 		If $chatId <> "" And $botToken <> "" Then
-			pro_SendTelegramMessage($chatId, $botToken, $message, True)
+			mknTelegramSend($chatId, $botToken, $message, True)
+		Else
+			ConsoleWrite("[WARN] Chat ID and token is empty.")
 		EndIf
 	EndIf
 EndFunc
 
-Func pro_SendTelegramMessage(Const $chatId, Const $botToken, Const $message = "", Const $showPopup = False)
+Func mknTelegramSend(Const $chatId, Const $botToken, Const $message = "", Const $showPopup = False)
 	Local $apiUrl = "https://api.telegram.org/bot" & $botToken & "/sendMessage"
 	Local $header = "Content-Type: application/json"
 	Local $disableNotification = 'true'

@@ -1,10 +1,9 @@
 #include-once
-#include <Array.au3>
-#include <MsgBoxConstants.au3>
-#include "ProConstant.au3"
-
+#include "AppConstant.au3"
 Global $mknState = ObjCreate("Scripting.Dictionary")
-; These variables is the state and will be modified while app run
+
+; Default initiated state
+; =======================
 $mknState.Add($APP_IN_BATTLE, False)
 $mknState.Add($APP_BATTLE_BEGIN, False)
 $mknState.Add($APP_BATTLE_END, False)
@@ -22,6 +21,10 @@ $mknState.Add($APP_IN_SPAWN, False)
 $mknState.Add($APP_SPAWN_LAST_DIRECTION, "")
 $mknState.Add($APP_SPAWN_LAST_PRESS, 0)
 
+; Functions to handle app state
+; =============================
+#Region App state functions
+
 Func mknStateGet(Const $key)
 	Return $mknState.Item($key)
 EndFunc
@@ -29,3 +32,5 @@ EndFunc
 Func mknStateSet(Const $key, Const $value)
 	$mknState.Item($key) = $value
 EndFunc
+
+#EndRegion

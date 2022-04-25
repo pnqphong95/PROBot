@@ -1,14 +1,16 @@
 #include <Misc.au3>
 #include <Array.au3>
-#include "Functions\ProConstant.au3"
-#include "Functions\AppSetting.au3"
-#include "Functions\AppState.au3"
+#include "Functions\Storage\AppConstant.au3"
+#include "Functions\Storage\AppSetting.au3"
+#include "Functions\Storage\AppState.au3"
 #include "Functions\Utility.au3"
 #include "Functions\NotificationHelper.au3"
 #include "Functions\ScreenCapturing.au3"
 
-mknLoadAppSetting(@ScriptDir & "\MonKnife.ini")
+mknAppSettingInit(@ScriptDir & "\MonKnife.ini")
 mknStateSet($APP_BATTLE_OPPONENT_WISH, "Froakie")
+
+; pro_StartWorker()
 
 Func pro_StartWorker()
 	Local $User32 = DllOpen("user32.dll")
@@ -62,9 +64,7 @@ Func _evalOpponentCtl()
 		Local $wildPokemonName = mknStateGet($APP_BATTLE_TITLE)
 		If _valueableOpponent($wildPokemonName) Then
 			mknStateSet($APP_BATTLE_DECISION, "HOLD_ON")
-			If mknAppSetting($APP_BATTLE_HOLD_ON_NOTIFICATION) Then
-				pro_NotifyPokemon(mknStateGet($APP_BATTLE_TITLE))
-			EndIf
+			mknNotifyPokemonFound(mknStateGet($APP_BATTLE_TITLE))
 		EndIf
 	EndIf
 EndFunc
@@ -74,7 +74,7 @@ Func _battleProcessingCtl(Const $app)
 		Case "RUN_AWAY"
 			Send("{V 2}")
 		Case "HOLD_ON"
-			; _useFalseSwipe($app)		
+			; _useFalseSwipe($app)
 		Case Else
 	EndSwitch
 EndFunc
@@ -136,7 +136,7 @@ Func _useFalseSwipe(Const $app)
 		mknStateSet($APP_BATTLE_CONTROLLER_STATE_POKEMON, $pokeSelect)
 		mknStateSet($APP_BATTLE_CONTROLLER_FREE, False)
 	EndIf
-	
+
 	If mknStateGet($APP_BATTLE_CONTROLLER_STATE_FIGHT) = "" Then
 		_waitForBattleControlFree($app)
 		Send("{" & $fightMoveControllerSelect &" 1}")
@@ -148,7 +148,7 @@ Func _useFalseSwipe(Const $app)
 EndFunc
 
 Func mknGetApp(Const $activate = False)
-	Local $appTitle = mknAppSetting($APP_TITLE)
+	Local $appTitle = mknAppSettingGet($APP_TITLE)
 	Local $hnwds = WinList($appTitle)
 	Local $instanceNum = $hnwds[0][0]
 	If ($instanceNum > 1) Then

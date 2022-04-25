@@ -1,7 +1,9 @@
 #include-once
 
 Global Const $APP_TITLE = "app.title"
-Global Const $APP_BATTLE_HOLD_ON_NOTIFICATION = "app.game.battle.holdon.notification"
+Global Const $APP_NOTIFICATION_ENABLE = "app.game.notification.enable"
+Global Const $APP_NOTIFICATION_TELEGRAM_CHAT_ID = "app.game.notification.telegram.chatid"
+Global Const $APP_NOTIFICATION_TELEGRAM_BOT_TOKEN = "app.game.notification.telegram.bottoken"
 Global Const $APP_ACTION_1 = "app.game.action1"
 Global Const $APP_ACTION_2 = "app.game.action2"
 Global Const $APP_ACTION_3 = "app.game.action3"
