@@ -1,12 +1,11 @@
 #include <Misc.au3>
 #include <Array.au3>
-#include "Functions\Storage\AppConstant.au3"
-#include "Functions\Storage\AppSetting.au3"
-#include "Functions\Storage\AppState.au3"
-#include "Functions\NotificationHelper.au3"
-#include "Functions\WndHelper.au3"
-#include "Functions\BattleControl.au3"
-#include "Functions\ScreenCapturing.au3"
+#include "Includes\Storage\AppConstant.au3"
+#include "Includes\Storage\AppSetting.au3"
+#include "Includes\Storage\AppState.au3"
+#include "Includes\NotificationHelper.au3"
+#include "Includes\WndHelper.au3"
+#include "Includes\BattleControl.au3"
 
 mknAppSettingInit(@ScriptDir & "\MonKnife.ini")
 mknStateSet($APP_BATTLE_OPPONENT_WISH, "Froakie")
@@ -52,9 +51,9 @@ Func _scanBattleScreenCtl(Const $hnwd)
 	If mknStateGet($APP_BATTLE_BEGIN) Then
 		mknStateSet($APP_BATTLE_TITLE_RAWTEXT, "")
 		mknStateSet($APP_BATTLE_TITLE, "")
-		Local $battleTitle = _captureBattleTitle($hnwd)
-		mknStateSet($APP_BATTLE_TITLE_RAWTEXT, $battleTitle)
-		mknStateSet($APP_BATTLE_TITLE, _extractWildPokemonName($battleTitle))
+		Local $battleRival = mknBattleRivalGet($hnwd)
+		mknStateSet($APP_BATTLE_TITLE_RAWTEXT, $battleRival)
+		mknStateSet($APP_BATTLE_TITLE, mknBattleWildPokemonNameExtract($battleRival))
 		ConsoleWrite(mknStateGet($APP_BATTLE_TITLE) & " attack! " & @CRLF)
 	EndIf
 EndFunc
@@ -114,7 +113,7 @@ Func _waitForBattleControlFree(Const $app, Const $waitSec = 30)
 		Local $free = False, $timer = TimerInit(), $elapsed = 0
 		While Not $free And $elapsed < $waitSec * 1000
 			Sleep(2000)
-			$free = pro_isBattleControlFree($app)
+			$free = mknBattleControlable($app)
 			$elapsed = TimerDiff($timer)
 		WEnd
 		If $free Then
