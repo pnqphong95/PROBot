@@ -1,8 +1,16 @@
+#cs ---------------------------------------------------------------------------- 
+ 
+ NOTICE: To avoid complexity, 
+ Please don't use mknStateSet to dispatch state inside this script.
+ Recommend: Only use mknStateSet inside *Dispatcher script.
+ 
+#ce ----------------------------------------------------------------------------
 #include-once
 #include <StringConstants.au3>
 #include "WndHelper.au3"
 #include "Libs\Tesseract.au3"
 #include "Storage\AppSetting.au3"
+#include "Storage\AppState.au3"
 
 #cs ----------------------------------------------------------------------------
 
@@ -98,4 +106,21 @@ Func mknBattleControlable($hnwd)
 		Return Not @error
 	EndIf
 	Return False
+EndFunc
+
+#cs ----------------------------------------------------------------------------
+
+ Version: 0.1.0
+ AutoIt Version: 3.3.16.0
+ Author: pnqphong95
+ Function: mknBattleRivalQualified
+ Description: Compare rival name with name in wishlist and skiplist.
+
+#ce ----------------------------------------------------------------------------
+Func mknBattleRivalQualified(Const $rivalName)
+	Local $wish = StringInStr(mknStateGet($APP_BATTLE_OPPONENT_WISH), $rivalName)
+	; Local $notSkip = Not StringInStr(mknStateGet($APP_BATTLE_OPPONENT_SKIP, $name)
+	; Temporarily set skip all if not wish
+	Local $notSkip = False
+	Return $rivalName = "" Or $wish Or $notSkip
 EndFunc
