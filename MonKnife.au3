@@ -2,6 +2,7 @@
 #include <Array.au3>
 #include "Includes\Storage\AppConstant.au3"
 #include "Includes\Storage\AppSetting.au3"
+#include "Includes\Storage\BotSetting.au3"
 #include "Includes\Storage\AppState.au3"
 #include "Includes\WndHelper.au3"
 #include "Includes\BattleControl.au3"
@@ -10,7 +11,7 @@
 
 Func mknBotStart()
 	mknAppSettingInit(@ScriptDir & "\MonKnife.ini")
-	mknStateSet($APP_BATTLE_OPPONENT_WISH, "Froakie")
+	mknBotSettingInit(@ScriptDir & "\Default-Bot.ini")
 	Local $appTitle = mknAppSettingGet($APP_TITLE)
 	While 1
 		Local $app = mknGetApp($appTitle, True)
@@ -21,7 +22,7 @@ Func mknBotStart()
 			mknBattleHandler($app)
 			ContinueLoop
 		Else
-			mknSpawnMoving(200, 300)
+			mknSpawnMoving()
 		EndIf
 	WEnd
 EndFunc

@@ -1,6 +1,6 @@
 #include-once
 
-; App Setting Keys, must change corresponding value in MonKnife.ini if modify these values
+;~ App Setting Keys, must change corresponding value in MonKnife.ini if modify these values
 Global Const $APP_TITLE = "app.title"
 Global Const $APP_NOTIFICATION_ENABLE = "app.game.notification.enable"
 Global Const $APP_NOTIFICATION_TELEGRAM_CHAT_ID = "app.game.notification.telegram.chatid"
@@ -26,21 +26,25 @@ Global Const $APP_BATTLE_CONTROLABLE_IDENTIFIER_W = "app.game.battle.controlable
 Global Const $APP_BATTLE_CONTROLABLE_IDENTIFIER_H = "app.game.battle.controlable.identifier.h"
 Global Const $APP_BATTLE_CONTROLABLE_IDENTIFIER_COLOR = "app.game.battle.controlable.identifier.color"
 
+;~ Bot setting keys
+Global Const $APP_BATTLE_RIVAL_WISHLIST = "app.game.battle.rival.wishlist"
+Global Const $APP_BATTLE_RIVAL_IGNORELIST = "app.game.battle.rival.ignorelist"
+Global Const $APP_SPAWN_START_DIRECTION = "app.game.spawn.direction.start"
+Global Const $APP_SPAWN_SHORTEST_PRESS = "app.game.spawn.press.shortest"
+Global Const $APP_SPAWN_LONGEST_PRESS = "app.game.spawn.press.longest"
+
 ; App State Keys
-Global Const $APP_SESSION_TIME = "app.game.session.time"
 Global Const $APP_IN_BATTLE = "app.game.battle.on"
-Global Const $APP_BATTLE_BEGIN = "app.game.battle.switchon"
-Global Const $APP_BATTLE_END = "app.game.battle.switchoff"
+Global Const $APP_BATTLE_BEGIN = "app.game.battle.on.begin"
+Global Const $APP_BATTLE_END = "app.game.battle.on.end"
 Global Const $APP_BATTLE_TITLE = "app.game.battle.title"
 Global Const $APP_BATTLE_TITLE_RAWTEXT = "app.game.battle.title.rawtext"
 Global Const $APP_BATTLE_DECISION = "app.game.battle.decision"
-Global Const $APP_BATTLE_OPPONENT_WISH = "app.game.battle.opponent.wish"
-Global Const $APP_BATTLE_OPPONENT_SKIP = "app.game.battle.opponent.skip"
+Global Const $APP_SPAWN_LAST_DIRECTION = "app.game.spawn.direction.last"
+
+;~ 
 Global Const $APP_BATTLE_CONTROLLER_READY = "app.game.battle.controller.ready"
 Global Const $APP_BATTLE_CONTROLLER_STATE = "app.game.battle.controller.state"
 Global Const $APP_BATTLE_CONTROLLER_STATE_FIGHT = "app.game.battle.controller.state.fight"
 Global Const $APP_BATTLE_CONTROLLER_STATE_POKEMON = "app.game.battle.controller.state.pokemon"
 Global Const $APP_BATTLE_CONTROLLER_STATE_ITEM = "app.game.battle.controller.state.item"
-Global Const $APP_IN_SPAWN = "app.game.spawn.on"
-Global Const $APP_SPAWN_LAST_DIRECTION = "app.game.spawn.lastdirection"
-Global Const $APP_SPAWN_LAST_PRESS = "app.game.spawn.lastpress"

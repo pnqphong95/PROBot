@@ -1,4 +1,5 @@
 #include-once
+#include "Includes\Storage\BotSetting.au3"
 #include "Includes\Storage\AppState.au3"
 
 #cs ----------------------------------------------------------------------------
@@ -11,13 +12,21 @@
 
 #ce ----------------------------------------------------------------------------
 Func mknSpawnDirectionRelease()
-	Send("{" & mknStateGet($APP_SPAWN_LAST_DIRECTION) & " up}")
+	Local $lastDirection = mknStateGet($APP_SPAWN_LAST_DIRECTION)
+	If $lastDirection <> "" Then
+		Send("{" & $lastDirection & " up}")
+	EndIf
 EndFunc
 
-Func mknSpawnMoving(Const $lowest, Const $highest)
-	Local $randomPress = Random($lowest, $highest, 1)
+Func mknSpawnMoving()
+	Local $shortest = mknBotSettingGet($APP_SPAWN_SHORTEST_PRESS)
+	Local $longest = mknBotSettingGet($APP_SPAWN_LONGEST_PRESS)
+	Local $randomPress = Random($shortest, $longest, 1)
 	If mknStateGet($APP_SPAWN_LAST_DIRECTION) = "" Then
-		mknStateSet($APP_SPAWN_LAST_DIRECTION, "LEFT")
+		Local $startDirection = mknBotSettingGet($APP_SPAWN_START_DIRECTION)
+		If $startDirection <> "" Then
+			mknStateSet($APP_SPAWN_LAST_DIRECTION, $startDirection)
+		EndIf
 	EndIf
 	If mknStateGet($APP_SPAWN_LAST_DIRECTION) = "LEFT" Then
 		Send("{RIGHT down}")

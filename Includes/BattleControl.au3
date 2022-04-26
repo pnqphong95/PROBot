@@ -10,7 +10,7 @@
 #include "WndHelper.au3"
 #include "Libs\Tesseract.au3"
 #include "Storage\AppSetting.au3"
-#include "Storage\AppState.au3"
+#include "Storage\BotSetting.au3"
 
 #cs ----------------------------------------------------------------------------
 
@@ -118,9 +118,10 @@ EndFunc
 
 #ce ----------------------------------------------------------------------------
 Func mknBattleRivalQualified(Const $rivalName)
-	Local $wish = StringInStr(mknStateGet($APP_BATTLE_OPPONENT_WISH), $rivalName)
-	; Local $notSkip = Not StringInStr(mknStateGet($APP_BATTLE_OPPONENT_SKIP, $name)
+	Local $wishlist = mknBotSettingGet($APP_BATTLE_RIVAL_WISHLIST)
+	Local $wish = StringInStr($wishlist, $rivalName)
+	; Local $notIgnore = Not StringInStr(mknBotSettingGet($APP_BATTLE_RIVAL_IGNORELIST, $name)
 	; Temporarily set skip all if not wish
-	Local $notSkip = False
-	Return $rivalName = "" Or $wish Or $notSkip
+	Local $notIgnore = False
+	Return $rivalName = "" Or $wishlist = "" Or $wish Or $notIgnore
 EndFunc
