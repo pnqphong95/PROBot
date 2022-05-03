@@ -6,7 +6,7 @@ Global $mknAppSettings = ObjCreate("Scripting.Dictionary")
 ; Default app settings
 ; ====================
 $mknAppSettings.Add($APP_TITLE, "PROClient")
-$mknAppSettings.Add($APP_NOTIFICATION_ENABLE, 1)
+$mknAppSettings.Add($APP_NOTIFICATION_ENABLE, 0)
 $mknAppSettings.Add($APP_NOTIFICATION_TELEGRAM_CHAT_ID, "")
 $mknAppSettings.Add($APP_NOTIFICATION_TELEGRAM_BOT_TOKEN, "")
 $mknAppSettings.Add($APP_BATTLE_IDENTIFIER_X, 380)
