@@ -6,6 +6,7 @@ Global $mknBotAutoCatch = ObjCreate("Scripting.Dictionary")
 
 ; Default bot settings
 ; ====================
+$mknBotSettings.Add($APP_NOTIFICATION_ENABLE, 0)
 $mknBotSettings.Add($APP_BATTLE_ACTION_AUTO_CATCH, "")
 $mknBotSettings.Add($APP_BATTLE_ACTION_RUN_AWAY, "")
 $mknBotSettings.Add($APP_BATTLE_RIVAL_WISHLIST, "")
