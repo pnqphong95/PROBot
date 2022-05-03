@@ -77,7 +77,10 @@ Func mknBattleWildPokemonNameExtract(Const $battleRivalName)
 	If $keywordPosition = 0 Or @error Then
 		Return $battleRivalName
 	Else
-		Return StringRight($stripText, StringLen($stripText) - ($keywordPosition + StringLen($keyword)))
+		ConsoleWrite("[Rival] Raw: " & $stripText & @CRLF)
+		Local $includeKeyword = StringRight($stripText, StringLen($stripText) - $keywordPosition + 1)
+		Local $nonKeyword = StringRight($includeKeyword, StringLen($includeKeyword) - StringLen($keyword) - 1)
+		Return $nonKeyword
 	EndIf
 EndFunc
 
@@ -118,10 +121,26 @@ EndFunc
 
 #ce ----------------------------------------------------------------------------
 Func mknBattleRivalQualified(Const $rivalName)
+	If $rivalName = "" Then
+		Return True
+	EndIf
 	Local $wishlist = mknBotSettingGet($APP_BATTLE_RIVAL_WISHLIST)
+	If $wishlist = "" Then
+		Return True
+	EndIf
 	Local $wish = StringInStr($wishlist, $rivalName)
 	; Local $notIgnore = Not StringInStr(mknBotSettingGet($APP_BATTLE_RIVAL_IGNORELIST, $name)
 	; Temporarily set skip all if not wish
 	Local $notIgnore = False
-	Return $rivalName = "" Or $wishlist = "" Or $wish Or $notIgnore
+	If $wish Or $notIgnore Then
+		Return True
+	EndIf
+	Local $extractedWishList = StringSplit($wishlist, " ")
+	For $i = 1 To $extractedWishList[0]
+		Local $keywordInRivalName = StringInStr($rivalName, $extractedWishList[$i])
+		If $keywordInRivalName Then
+			Return True
+		EndIf
+	Next
+	Return False
 EndFunc

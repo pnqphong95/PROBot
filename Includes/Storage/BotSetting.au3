@@ -1,15 +1,19 @@
 #include-once
+#include <StringConstants.au3>
 #include "AppConstant.au3"
 Global $mknBotSettings = ObjCreate("Scripting.Dictionary")
-
+Global $mknBotAutoCatch = ObjCreate("Scripting.Dictionary")
 
 ; Default bot settings
 ; ====================
+$mknBotSettings.Add($APP_BATTLE_ACTION_AUTO_CATCH, "")
+$mknBotSettings.Add($APP_BATTLE_ACTION_RUN_AWAY, "")
 $mknBotSettings.Add($APP_BATTLE_RIVAL_WISHLIST, "")
 $mknBotSettings.Add($APP_BATTLE_RIVAL_IGNORELIST, "")
 $mknBotSettings.Add($APP_SPAWN_START_DIRECTION, "LEFT")
 $mknBotSettings.Add($APP_SPAWN_SHORTEST_PRESS, 300)
 $mknBotSettings.Add($APP_SPAWN_LONGEST_PRESS, 500)
+
 
 ; Functions to handle $mknBotSetting dictionary
 ; =============================================
@@ -40,6 +44,30 @@ EndFunc
 
 Func mknBotSettingGet(Const $key)
     Return $mknBotSettings.Item($key)
+EndFunc
+
+Func mknBotAutoCatchActions()
+    Return $mknBotAutoCatch
+EndFunc
+
+Func mknBotSettingParseAutoCatchAction()
+    Local $autoCatchTxt = mknBotSettingGet($APP_BATTLE_ACTION_AUTO_CATCH)
+    If $autoCatchTxt <> "" Then
+        Local $stripTxt = StringStripWS($autoCatchTxt, $STR_STRIPALL)
+        Local $actions = StringSplit($stripTxt, "|")
+        For $i = 1 To $actions[0]
+            Local $actionRetryPair = StringSplit($actions[$i], "_")
+            Local $actionKey = $actionRetryPair[1]
+            If $actionRetryPair[0] = 1 Then
+                $mknBotAutoCatch.Item($actionKey) = 1
+            ElseIf $actionRetryPair[0] = 2 Then
+                $mknBotAutoCatch.Item($actionKey) = Number($actionRetryPair[2])
+            Else
+                ConsoleWrite("[Setting Error] Action contain more than one _.  " & $actions[$i])
+                Exit
+            EndIf 
+        Next
+    EndIf
 EndFunc
 
 #EndRegion

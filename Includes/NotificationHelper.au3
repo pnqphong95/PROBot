@@ -2,9 +2,21 @@
 #include "Storage\AppConstant.au3"
 #include "Storage\AppSetting.au3"
 
-Func mknNotifyPokemonFound(Const $pokemon)
+Func mknNotifyPokemonAutoCatch(Const $pokemon)
     If $pokemon <> "" Then
-        mknSendMessage('Yayy! Found one ' & $pokemon)
+        mknSendMessage($pokemon & " attacks! Auto catch processing..")
+    EndIf
+EndFunc
+
+Func mknNotifyPokemonCaught(Const $pokemon)
+    If $pokemon <> "" Then
+        mknSendMessage("Gotcha! " & $pokemon & " caught.")
+    EndIf
+EndFunc
+
+Func mknNotifyPokemonUncaught(Const $pokemon)
+    If $pokemon <> "" Then
+        mknSendMessage("Can not catch " & $pokemon & " automatically! Hold-on")
     EndIf
 EndFunc
 
