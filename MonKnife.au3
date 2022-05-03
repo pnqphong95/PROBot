@@ -54,7 +54,7 @@ EndFunc
 Func mknSettingLoad()
 	mknAppSettingInit(@ScriptDir & "\MonKnife.ini")
 	mknBotSettingInit(@ScriptDir & "\Default-Bot.ini")
-	mknBotSettingParseAutoCatchAction()
+	mknBotSettingParseActionChain()
 EndFunc
 
 Func mknBotStateSwitch()

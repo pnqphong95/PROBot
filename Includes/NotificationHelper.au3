@@ -3,9 +3,9 @@
 #include "Storage\AppSetting.au3"
 #include "Storage\BotSetting.au3"
 
-Func mknNotifyPokemonAutoCatch(Const $pokemon)
+Func mknNotifyPokemonActionChainProcessing(Const $pokemon)
     If $pokemon <> "" Then
-        mknSendMessage($pokemon & " attacks! Auto catch processing..")
+        mknSendMessage($pokemon & " attacks! Action chain process..")
     EndIf
 EndFunc
 

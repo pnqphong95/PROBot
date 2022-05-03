@@ -59,7 +59,7 @@ Func mknBattleRivalEvaluationDispatch()
 		Local $rivalName = mknStateGet($APP_BATTLE_TITLE)
 		If mknBattleRivalQualified($rivalName) Then
 			mknStateSet($APP_BATTLE_DECISION, "AUTO_CATCH")
-			mknNotifyPokemonAutoCatch(mknStateGet($APP_BATTLE_TITLE))
+			mknNotifyPokemonActionChainProcessing(mknStateGet($APP_BATTLE_TITLE))
 		EndIf
 	EndIf
 EndFunc
@@ -117,7 +117,7 @@ EndFunc
 
 #ce ----------------------------------------------------------------------------
 Func mknBattleAutocatch(Const $app)
-	Local $actions = mknBotAutoCatchActions()
+	Local $actions = mknBotActionChainGet()
 	If mknStateGet($APP_IN_BATTLE) Then
 		mknStateSet($APP_BATTLE_CONTROLLER_READY, False)
 		For $actionKey In $actions 
