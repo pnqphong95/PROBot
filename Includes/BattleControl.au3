@@ -21,7 +21,7 @@
  Author: pnqphong95
  Function: mknBattleIsDisplayed
  Description: Search if battle dialog is displayed on given window screen.
- Settings: Read settings coordinator x, y, width, height from MonKnife.ini
+ Settings: Read settings coordinator x, y, width, height from PROBot.ini
 
 #ce ----------------------------------------------------------------------------
 Func mknBattleIsDisplayed($hnwd)
@@ -48,7 +48,7 @@ EndFunc
  Author: pnqphong95
  Function: mknBattleRivalGet
  Description: Get battle rival. e.g: Wild pokemon,..
- Settings: Read settings coordinator x, y, width, height from MonKnife.ini
+ Settings: Read settings coordinator x, y, width, height from PROBot.ini
 
 #ce ----------------------------------------------------------------------------
 Func mknBattleRivalGet($hnwd)
@@ -70,7 +70,7 @@ EndFunc
  Author: pnqphong95
  Function: mknBattleMessageGet
  Description: Get last battle message. e.g: ability now Marvel Scale,..
- Settings: Read settings coordinator x, y, width, height from MonKnife.ini
+ Settings: Read settings coordinator x, y, width, height from PROBot.ini
 
 #ce ----------------------------------------------------------------------------
 Func mknBattleMessageGet($hnwd)
@@ -114,8 +114,8 @@ EndFunc
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
  Function: mknBattleControlable
- Description: Check if battle is able to receive input from MonKnife
- Settings: Read settings coordinator x, y, width, height from MonKnife.ini
+ Description: Check if battle is able to receive input from PROBot
+ Settings: Read settings coordinator x, y, width, height from PROBot.ini
 
 #ce ----------------------------------------------------------------------------
 Func mknBattleControlable($hnwd)

@@ -9,8 +9,8 @@
 #include "Includes\Storage\AppState.au3"
 #include "Includes\WndHelper.au3"
 #include "Includes\BattleControl.au3"
-#include "BattleControlDispatcher.au3"
-#include "SpawnControlDispatcher.au3"
+#include "BattleDispatcher.au3"
+#include "SpawnDispatcher.au3"
 Global $BotPaused = True, $LogFile
 
 mknInit()
@@ -52,7 +52,7 @@ Func mknBotStart()
 EndFunc
 
 Func mknSettingLoad()
-	mknAppSettingInit(@ScriptDir & "\MonKnife.ini")
+	mknAppSettingInit(@ScriptDir & "\PROBot.ini")
 	mknBotSettingInit(@ScriptDir & "\Default-Bot.ini")
 	mknBotSettingParseActionChain()
 EndFunc

@@ -1,6 +1,6 @@
 #include-once
 
-;~ App Setting Keys, must change corresponding value in MonKnife.ini if modify these values
+;~ App Setting Keys, must change corresponding value in PROBot.ini if modify these values
 Global Const $APP_TITLE = "app.title"
 Global Const $APP_NOTIFICATION_ENABLE = "app.game.notification.enable"
 Global Const $APP_NOTIFICATION_TELEGRAM_CHAT_ID = "app.game.notification.telegram.chatid"
