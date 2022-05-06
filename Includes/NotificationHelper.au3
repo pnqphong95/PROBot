@@ -3,35 +3,35 @@
 #include "Storage\AppSetting.au3"
 #include "Storage\BotSetting.au3"
 
-Func mknNotifyPokemonActionChainProcessing(Const $pokemon)
+Func pbNotifyPokemonActionChainProcessing(Const $pokemon)
     If $pokemon <> "" Then
-        mknSendMessage($pokemon & " attacks! Action chain process..")
+        pbSendMessage($pokemon & " attacks! Action chain process..")
     EndIf
 EndFunc
 
-Func mknNotifyPokemonCaught(Const $pokemon, Const $photoPath = "")
+Func pbNotifyPokemonCaught(Const $pokemon, Const $photoPath = "")
     If $pokemon <> "" Then
-        mknSendMessage("Gotcha! " & $pokemon & " caught.", $photoPath)
+        pbSendMessage("Gotcha! " & $pokemon & " caught.", $photoPath)
     EndIf
 EndFunc
 
-Func mknNotifyPokemonUncaught(Const $pokemon)
+Func pbNotifyPokemonUncaught(Const $pokemon)
     If $pokemon <> "" Then
-        mknSendMessage("Can not catch " & $pokemon & " automatically! Hold-on")
+        pbSendMessage("Can not catch " & $pokemon & " automatically! Hold-on")
     EndIf
 EndFunc
 
-Func mknSendMessage(Const $message, Const $photo = "")
-	Local $enable = mknAppSettingGet($APP_NOTIFICATION_ENABLE)
-	Local $botEnable = mknBotSettingGet($APP_NOTIFICATION_ENABLE)
+Func pbSendMessage(Const $message, Const $photo = "")
+	Local $enable = pbAppSettingGet($APP_NOTIFICATION_ENABLE)
+	Local $botEnable = pbBotSettingGet($APP_NOTIFICATION_ENABLE)
 	If ($enable = 1 Or $botEnable = 1) And $message <> "" Then
-		Local $chatId = mknAppSettingGet($APP_NOTIFICATION_TELEGRAM_CHAT_ID)
-	    Local $botToken = mknAppSettingGet($APP_NOTIFICATION_TELEGRAM_BOT_TOKEN)
+		Local $chatId = pbAppSettingGet($APP_NOTIFICATION_TELEGRAM_CHAT_ID)
+	    Local $botToken = pbAppSettingGet($APP_NOTIFICATION_TELEGRAM_BOT_TOKEN)
 		If $chatId <> "" And $botToken <> "" Then
 			If $photo <> "" And FileExists($photo) Then
-				mknTelegramSendPhoto($chatId, $botToken, $photo, $message)
+				pbTelegramSendPhoto($chatId, $botToken, $photo, $message)
 			Else
-				mknTelegramSend($chatId, $botToken, $message, True)
+				pbTelegramSend($chatId, $botToken, $message, True)
 			EndIf
 		Else
 			ConsoleWrite("[WARN] Chat ID and token is empty.")
@@ -39,7 +39,7 @@ Func mknSendMessage(Const $message, Const $photo = "")
 	EndIf
 EndFunc
 
-Func mknTelegramSend(Const $chatId, Const $botToken, Const $message = "", Const $showPopup = False)
+Func pbTelegramSend(Const $chatId, Const $botToken, Const $message = "", Const $showPopup = False)
 	Local $apiUrl = "https://api.telegram.org/bot" & $botToken & "/sendMessage"
 	Local $header = "Content-Type: application/json"
 	Local $disableNotification = 'true'
@@ -50,7 +50,7 @@ Func mknTelegramSend(Const $chatId, Const $botToken, Const $message = "", Const 
 	ShellExecute(@SystemDir & "\curl.exe", '-XPOST -H "' & $header & '" -d "' & $body & '" ' & $apiUrl, "", "", @SW_HIDE)
 EndFunc
 
-Func mknTelegramSendPhoto(Const $chatId, Const $botToken, Const $photoPath, Const $caption = "")
+Func pbTelegramSendPhoto(Const $chatId, Const $botToken, Const $photoPath, Const $caption = "")
 	Local $apiUrl = "https://api.telegram.org/bot" & $botToken & "/sendPhoto"
 	Local $params =  '-F "photo=@' & $photoPath & '" -F "chat_id=\"' & $chatId & '\"" -F "caption=\"' & $caption & '\""'
 	ShellExecute(@SystemDir & "\curl.exe", '-XPOST "' & $apiUrl & '" ' & $params, "", "", @SW_HIDE)

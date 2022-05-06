@@ -1,8 +1,8 @@
 #cs ----------------------------------------------------------------------------
 
  NOTICE: To avoid complexity,
- Please don't use mknStateSet to dispatch state inside this script.
- Recommend: Only use mknStateSet inside *Dispatcher script.
+ Please don't use pbStateSet to dispatch state inside this script.
+ Recommend: Only use pbStateSet inside *Dispatcher script.
 
 #ce ----------------------------------------------------------------------------
 #include-once
@@ -19,22 +19,22 @@
  Version: 0.1.0
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
- Function: mknBattleIsDisplayed
+ Function: pbBattleIsDisplayed
  Description: Search if battle dialog is displayed on given window screen.
  Settings: Read settings coordinator x, y, width, height from PROBot.ini
 
 #ce ----------------------------------------------------------------------------
-Func mknBattleIsDisplayed($hnwd)
+Func pbBattleIsDisplayed($hnwd)
 	If IsHWnd($hnwd) Then
 		; Sets the way coords are used in the pixel search functions.
 		; 2 =  relative coords to the client area of the defined window.
 		activateWindow($hnwd)
 		Opt("PixelCoordMode", 2)
-		Local $color = mknAppSettingGet($APP_BATTLE_IDENTIFIER_COLOR)
-        Local $xCoor = mknAppSettingGet($APP_BATTLE_IDENTIFIER_X)
-        Local $yCoor = mknAppSettingGet($APP_BATTLE_IDENTIFIER_Y)
-        Local $width = mknAppSettingGet($APP_BATTLE_IDENTIFIER_W)
-        Local $height = mknAppSettingGet($APP_BATTLE_IDENTIFIER_H)
+		Local $color = pbAppSettingGet($APP_BATTLE_IDENTIFIER_COLOR)
+        Local $xCoor = pbAppSettingGet($APP_BATTLE_IDENTIFIER_X)
+        Local $yCoor = pbAppSettingGet($APP_BATTLE_IDENTIFIER_Y)
+        Local $width = pbAppSettingGet($APP_BATTLE_IDENTIFIER_W)
+        Local $height = pbAppSettingGet($APP_BATTLE_IDENTIFIER_H)
         Local $resultCoor = PixelSearch($xCoor, $yCoor, $xCoor + $width, $yCoor + $height, $color, 1, 1, $hnwd)
 		Return Not @error
 	EndIf
@@ -46,18 +46,18 @@ EndFunc
  Version: 0.1.0
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
- Function: mknBattleRivalGet
+ Function: pbBattleRivalGet
  Description: Get battle rival. e.g: Wild pokemon,..
  Settings: Read settings coordinator x, y, width, height from PROBot.ini
 
 #ce ----------------------------------------------------------------------------
-Func mknBattleRivalGet($hnwd)
+Func pbBattleRivalGet($hnwd)
 	If IsHWnd($hnwd) Then
 		_TesseractTempPathSet(@TempDir & "\")
-		Local $xCoor = mknAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_X)
-        Local $yCoor = mknAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_Y)
-        Local $width = mknAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_W)
-        Local $height = mknAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_H)
+		Local $xCoor = pbAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_X)
+        Local $yCoor = pbAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_Y)
+        Local $width = pbAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_W)
+        Local $height = pbAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_H)
 		Return _TesseractWinCapture(WinGetTitle($hnwd), "", 0, "", 1, 2, $xCoor, $yCoor, $xCoor + $width, $yCoor + $height, 0)
 	EndIf
 	Return ""
@@ -68,12 +68,12 @@ EndFunc
  Version: 0.1.0
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
- Function: mknBattleMessageGet
+ Function: pbBattleMessageGet
  Description: Get last battle message. e.g: ability now Marvel Scale,..
  Settings: Read settings coordinator x, y, width, height from PROBot.ini
 
 #ce ----------------------------------------------------------------------------
-Func mknBattleMessageGet($hnwd)
+Func pbBattleMessageGet($hnwd)
 	If IsHWnd($hnwd) Then
 		_TesseractTempPathSet(@TempDir & "\")
 		Local $xCoor = 350
@@ -90,11 +90,11 @@ EndFunc
  Version: 0.1.0
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
- Function: mknBattleWildPokemonNameExtract
- Description: Extract Pokemon name from Raw captured by mknBattleRivalGet
+ Function: pbBattleWildPokemonNameExtract
+ Description: Extract Pokemon name from Raw captured by pbBattleRivalGet
 
 #ce ----------------------------------------------------------------------------
-Func mknBattleWildPokemonNameExtract(Const $battleRivalName)
+Func pbBattleWildPokemonNameExtract(Const $battleRivalName)
 	Local $keyword = "Wild"
 	Local $stripText = StringStripWS($battleRivalName, $STR_STRIPTRAILING)
 	Local $keywordPosition = StringInStr($stripText, $keyword, 1)
@@ -113,22 +113,22 @@ EndFunc
  Version: 0.1.0
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
- Function: mknBattleControlable
+ Function: pbBattleControlable
  Description: Check if battle is able to receive input from PROBot
  Settings: Read settings coordinator x, y, width, height from PROBot.ini
 
 #ce ----------------------------------------------------------------------------
-Func mknBattleControlable($hnwd)
+Func pbBattleControlable($hnwd)
 	If IsHWnd($hnwd) Then
 		; Sets the way coords are used in the pixel search functions.
 		; 2 =  relative coords to the client area of the defined window.
 		activateWindow($hnwd)
 		Opt("PixelCoordMode", 2)
-		Local $color = mknAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_COLOR)
-        Local $xCoor = mknAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_X)
-        Local $yCoor = mknAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_Y)
-        Local $width = mknAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_W)
-        Local $height = mknAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_H)
+		Local $color = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_COLOR)
+        Local $xCoor = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_X)
+        Local $yCoor = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_Y)
+        Local $width = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_W)
+        Local $height = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_H)
         Local $resultCoor = PixelSearch($xCoor, $yCoor, $xCoor + $width, $yCoor + $height, $color, 1, 1, $hnwd)
 		Return Not @error
 	EndIf
@@ -140,16 +140,16 @@ EndFunc
  Version: 0.1.0
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
- Function: mknBattleRivalQualified
+ Function: pbBattleRivalQualified
  Description: Compare rival name with name in wishlist and skiplist.
 
 #ce ----------------------------------------------------------------------------
-Func mknBattleRivalQualified(Const $rivalName)
+Func pbBattleRivalQualified(Const $rivalName)
 	If $rivalName = "" Then
 		Return True
 	EndIf
-	Local $wishlist = mknBotSettingGet($APP_BATTLE_RIVAL_WISHLIST)
-	Local $notIgnoreList = mknBotSettingGet($APP_BATTLE_RIVAL_IGNORELIST)
+	Local $wishlist = pbBotSettingGet($APP_BATTLE_RIVAL_WISHLIST)
+	Local $notIgnoreList = pbBotSettingGet($APP_BATTLE_RIVAL_IGNORELIST)
 	If $wishlist = "" And $notIgnoreList = "" Then
 		Return True
 	EndIf
@@ -173,15 +173,15 @@ EndFunc
  Version: 0.1.0
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
- Function: mknBattleLastMessageMatch
+ Function: pbBattleLastMessageMatch
  Description: Compare last message with keyword in wish last message list.
 
 #ce ----------------------------------------------------------------------------
-Func mknBattleLastMessageMatch(Const $lastMsg)
+Func pbBattleLastMessageMatch(Const $lastMsg)
 	If $lastMsg = "" Then
 		Return True
 	EndIf
-	Local $wishLastMsg = mknBotSettingGet($APP_BATTLE_RIVAL_WISHLASTMSG)
+	Local $wishLastMsg = pbBotSettingGet($APP_BATTLE_RIVAL_WISHLASTMSG)
 	If $wishLastMsg = "" Then
 		Return True
 	EndIf
@@ -203,11 +203,11 @@ EndFunc
  Version: 0.1.0
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
- Function: mknBattlePokePreview
+ Function: pbBattlePokePreview
  Description: Capture the pokemon preview dialog
 
 #ce ----------------------------------------------------------------------------
-Func mknBattlePokePreview(Const $app)
+Func pbBattlePokePreview(Const $app)
 	Local $tempPreviewFile = _TempFile(@TempDir & "\", "proPreview_", ".jpg", Default)
 	_ScreenCapture_CaptureWnd($tempPreviewFile, $app, 880, 260, 1300, 650)
 	Return $tempPreviewFile

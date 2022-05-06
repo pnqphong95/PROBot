@@ -13,51 +13,51 @@
 #include "SpawnDispatcher.au3"
 Global $BotPaused = True, $LogFile
 
-mknInit()
+pbInit()
 
-Func mknInit()
+Func pbInit()
 	Opt("TrayMenuMode", 3)
 	Opt("TrayOnEventMode", 1)
 	Local $pauseControl = TrayCreateItem("Paused")
-	TrayItemSetOnEvent($pauseControl, "mknBotStateSwitch")
+	TrayItemSetOnEvent($pauseControl, "pbBotStateSwitch")
 	TrayCreateItem("")
 	Local $exitControl = TrayCreateItem("Exit")
-	TrayItemSetOnEvent($exitControl, "mknBotExit")
+	TrayItemSetOnEvent($exitControl, "pbBotExit")
 	TraySetState($TRAY_ICONSTATE_SHOW)
 	While 1
 		Sleep(5000)
-		mknBotStart()
+		pbBotStart()
 	WEnd
 EndFunc
 
-Func mknBotStart()
+Func pbBotStart()
 	$LogFile = FileOpen(@ScriptDir & "\Logs\Spawns_" & StringReplace(_NowCalcDate(), "/", "") & ".txt", $FO_APPEND)
 	If Not $BotPaused Then
-		mknSettingLoad()
-		Local $appTitle = mknAppSettingGet($APP_TITLE)
+		pbSettingLoad()
+		Local $appTitle = pbAppSettingGet($APP_TITLE)
 		While Not $BotPaused
-			Local $app = mknGetApp($appTitle, True)
-			mknBattleScreenDispatch($app, $LogFile)
-			mknSpawnDirectionRelease()
-			If mknStateGet($APP_IN_BATTLE) Then
-				mknBattleRivalEvaluationDispatch($app)
-				mknBattleHandler($app)
+			Local $app = pbGetApp($appTitle, True)
+			pbBattleScreenDispatch($app, $LogFile)
+			pbSpawnDirectionRelease()
+			If pbStateGet($APP_IN_BATTLE) Then
+				pbBattleRivalEvaluationDispatch($app)
+				pbBattleHandler($app)
 				ContinueLoop
 			Else
-				mknSpawnMoving()
+				pbSpawnMoving()
 			EndIf
 		WEnd
 	EndIf
 	FileClose($LogFile)
 EndFunc
 
-Func mknSettingLoad()
-	mknAppSettingInit(@ScriptDir & "\PROBot.ini")
-	mknBotSettingInit(@ScriptDir & "\Default-Bot.ini")
-	mknBotSettingParseActionChain()
+Func pbSettingLoad()
+	pbAppSettingInit(@ScriptDir & "\PROBot.ini")
+	pbBotSettingInit(@ScriptDir & "\Default-Bot.ini")
+	pbBotSettingParseActionChain()
 EndFunc
 
-Func mknBotStateSwitch()
+Func pbBotStateSwitch()
 	$BotPaused = Not $BotPaused
 	If $BotPaused Then
 		ConsoleWrite("[BOT] PAUSED ...")
@@ -66,6 +66,6 @@ Func mknBotStateSwitch()
 	EndIf
 EndFunc
 
-Func mknBotExit()
+Func pbBotExit()
 	Exit
 EndFunc

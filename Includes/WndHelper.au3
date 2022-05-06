@@ -7,7 +7,7 @@ Func activateWindow(Const $hnwd)
 	EndIf
 EndFunc
 
-Func mknGetApp(Const $appTitle, Const $activate = False)
+Func pbGetApp(Const $appTitle, Const $activate = False)
 	Local $hnwds = WinList($appTitle)
 	Local $instanceNum = $hnwds[0][0]
 	If ($instanceNum > 1) Then

@@ -1,34 +1,34 @@
 #include-once
 #include "AppConstant.au3"
-Global $mknAppSettings = ObjCreate("Scripting.Dictionary")
+Global $pbAppSettings = ObjCreate("Scripting.Dictionary")
 
 
 ; Default app settings
 ; ====================
-$mknAppSettings.Add($APP_TITLE, "PROClient")
-$mknAppSettings.Add($APP_NOTIFICATION_ENABLE, 0)
-$mknAppSettings.Add($APP_NOTIFICATION_TELEGRAM_CHAT_ID, "")
-$mknAppSettings.Add($APP_NOTIFICATION_TELEGRAM_BOT_TOKEN, "")
-$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_X, 380)
-$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_Y, 155)
-$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_W, 620)
-$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_H, 5)
-$mknAppSettings.Add($APP_BATTLE_IDENTIFIER_COLOR, "0x282528")
-$mknAppSettings.Add($APP_BATTLE_RIVAL_IDENTIFIER_X, 770)
-$mknAppSettings.Add($APP_BATTLE_RIVAL_IDENTIFIER_Y, 225)
-$mknAppSettings.Add($APP_BATTLE_RIVAL_IDENTIFIER_W, 300)
-$mknAppSettings.Add($APP_BATTLE_RIVAL_IDENTIFIER_H, 40)
-$mknAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_X, 920)
-$mknAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_Y, 575)
-$mknAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_W, 2)
-$mknAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_H, 1)
-$mknAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_COLOR, "0x8f8f8f")
+$pbAppSettings.Add($APP_TITLE, "PROClient")
+$pbAppSettings.Add($APP_NOTIFICATION_ENABLE, 0)
+$pbAppSettings.Add($APP_NOTIFICATION_TELEGRAM_CHAT_ID, "")
+$pbAppSettings.Add($APP_NOTIFICATION_TELEGRAM_BOT_TOKEN, "")
+$pbAppSettings.Add($APP_BATTLE_IDENTIFIER_X, 380)
+$pbAppSettings.Add($APP_BATTLE_IDENTIFIER_Y, 155)
+$pbAppSettings.Add($APP_BATTLE_IDENTIFIER_W, 620)
+$pbAppSettings.Add($APP_BATTLE_IDENTIFIER_H, 5)
+$pbAppSettings.Add($APP_BATTLE_IDENTIFIER_COLOR, "0x282528")
+$pbAppSettings.Add($APP_BATTLE_RIVAL_IDENTIFIER_X, 770)
+$pbAppSettings.Add($APP_BATTLE_RIVAL_IDENTIFIER_Y, 225)
+$pbAppSettings.Add($APP_BATTLE_RIVAL_IDENTIFIER_W, 300)
+$pbAppSettings.Add($APP_BATTLE_RIVAL_IDENTIFIER_H, 40)
+$pbAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_X, 920)
+$pbAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_Y, 575)
+$pbAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_W, 2)
+$pbAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_H, 1)
+$pbAppSettings.Add($APP_BATTLE_CONTROLABLE_IDENTIFIER_COLOR, "0x8f8f8f")
 
-; Functions to handle $mknAppSetting dictionary
+; Functions to handle $pbAppSetting dictionary
 ; =============================================
 #Region App setting functions
     
-Func mknAppSettingInit(Const $settingPath)
+Func pbAppSettingInit(Const $settingPath)
     Local $section = "AppSettings"
     If FileExists($settingPath) Then
         Local $appSettings = IniReadSection($settingPath, $section)
@@ -36,23 +36,23 @@ Func mknAppSettingInit(Const $settingPath)
             For $i = 1 To $appSettings[0][0]
                 Local $key = $appSettings[$i][0]
                 Local $value = $appSettings[$i][1]
-                Local $oldValue = mknAppSettingGet($key)
+                Local $oldValue = pbAppSettingGet($key)
                 If $value <> "" And $value <> $oldValue Then
-                    Local $oldValue = mknAppSettingGet($key)
+                    Local $oldValue = pbAppSettingGet($key)
                     ConsoleWrite("Setting overwritten [" & $key & "]: " & $oldValue &" -> " & $value & @CRLF)
-                    $mknAppSettings.Item($key) = $value
+                    $pbAppSettings.Item($key) = $value
                 EndIf
             Next
         EndIf
     Else
-        For $key In $mknAppSettings
-            IniWrite($settingPath, $section, $key, mknAppSettingGet($key))
+        For $key In $pbAppSettings
+            IniWrite($settingPath, $section, $key, pbAppSettingGet($key))
         Next
     EndIf
 EndFunc
 
-Func mknAppSettingGet(Const $key)
-    Return $mknAppSettings.Item($key)
+Func pbAppSettingGet(Const $key)
+    Return $pbAppSettings.Item($key)
 EndFunc
 
 #EndRegion
