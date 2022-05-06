@@ -53,13 +53,19 @@ EndFunc
     Otherwise, set run away of battle.
 
 #ce ----------------------------------------------------------------------------
-Func mknBattleRivalEvaluationDispatch()
+Func mknBattleRivalEvaluationDispatch(Const $app)
 	If mknStateGet($APP_BATTLE_BEGIN) Then
 		mknStateSet($APP_BATTLE_DECISION, "RUN_AWAY")
 		Local $rivalName = mknStateGet($APP_BATTLE_TITLE)
 		If mknBattleRivalQualified($rivalName) Then
-			mknStateSet($APP_BATTLE_DECISION, "AUTO_CATCH")
-			mknNotifyPokemonActionChainProcessing(mknStateGet($APP_BATTLE_TITLE))
+			mknStateSet($APP_BATTLE_CONTROLLER_READY, False)
+			mknBattleWaitForActionReadyDispatch($app, 1000, 30)
+			Local Const $lastMessage = mknBattleMessageGet($app)
+			Local Const $matched = mknBattleLastMessageMatch($lastMessage)
+			If $matched Then
+				mknStateSet($APP_BATTLE_DECISION, "ACTION_CHAIN")
+				mknNotifyPokemonActionChainProcessing(mknStateGet($APP_BATTLE_TITLE))
+			EndIf
 		EndIf
 	EndIf
 EndFunc
@@ -77,8 +83,8 @@ Func mknBattleHandler(Const $app)
 	Switch mknStateGet($APP_BATTLE_DECISION)
 		Case "RUN_AWAY"
 			mknBattleRunAway($app)
-		Case "AUTO_CATCH"
-			mknBattleAutocatch($app)
+		Case "ACTION_CHAIN"
+			mknBattleActionChain($app)
 		Case "HOLD_ON"
 		Case Else
 			; Leave the control to the user
@@ -116,7 +122,7 @@ EndFunc
  steps is configured by user (Configure auto catch action via Default-Bot.ini)
 
 #ce ----------------------------------------------------------------------------
-Func mknBattleAutocatch(Const $app)
+Func mknBattleActionChain(Const $app)
 	Local $actions = mknBotActionChainGet()
 	If mknStateGet($APP_IN_BATTLE) Then
 		mknStateSet($APP_BATTLE_CONTROLLER_READY, False)
@@ -162,7 +168,8 @@ Func mknBattleAutocatch(Const $app)
 			mknStateSet($APP_BATTLE_DECISION, "HOLD_ON")
 			mknNotifyPokemonUncaught(mknStateGet($APP_BATTLE_TITLE))
 		Else
-			mknNotifyPokemonCaught(mknStateGet($APP_BATTLE_TITLE))
+			Local $previewFile = mknBattlePokePreview($app)
+			mknNotifyPokemonCaught(mknStateGet($APP_BATTLE_TITLE), $previewFile)
 		EndIf
 	EndIf
 EndFunc

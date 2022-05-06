@@ -40,7 +40,7 @@ Func mknBotStart()
 			mknBattleScreenDispatch($app, $LogFile)
 			mknSpawnDirectionRelease()
 			If mknStateGet($APP_IN_BATTLE) Then
-				mknBattleRivalEvaluationDispatch()
+				mknBattleRivalEvaluationDispatch($app)
 				mknBattleHandler($app)
 				ContinueLoop
 			Else

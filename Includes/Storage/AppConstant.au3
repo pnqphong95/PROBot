@@ -23,6 +23,7 @@ Global Const $APP_BATTLE_CONTROLABLE_IDENTIFIER_COLOR = "app.game.battle.control
 ;~ Bot setting keys
 Global Const $APP_BATTLE_RIVAL_WISHLIST = "app.game.battle.rival.wishlist"
 Global Const $APP_BATTLE_RIVAL_IGNORELIST = "app.game.battle.rival.ignorelist"
+Global Const $APP_BATTLE_RIVAL_WISHLASTMSG = "app.game.battle.rival.wishlastmsg"
 Global Const $APP_BATTLE_ACTION_CHAIN = "app.game.battle.action.chain"
 Global Const $APP_BATTLE_ACTION_RUN_AWAY = "app.game.battle.action.runaway"
 Global Const $APP_SPAWN_START_DIRECTION = "app.game.spawn.direction.start"

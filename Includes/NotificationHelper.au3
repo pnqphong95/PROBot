@@ -9,9 +9,9 @@ Func mknNotifyPokemonActionChainProcessing(Const $pokemon)
     EndIf
 EndFunc
 
-Func mknNotifyPokemonCaught(Const $pokemon)
+Func mknNotifyPokemonCaught(Const $pokemon, Const $photoPath = "")
     If $pokemon <> "" Then
-        mknSendMessage("Gotcha! " & $pokemon & " caught.")
+        mknSendMessage("Gotcha! " & $pokemon & " caught.", $photoPath)
     EndIf
 EndFunc
 
@@ -21,14 +21,18 @@ Func mknNotifyPokemonUncaught(Const $pokemon)
     EndIf
 EndFunc
 
-Func mknSendMessage(Const $message)
+Func mknSendMessage(Const $message, Const $photo = "")
 	Local $enable = mknAppSettingGet($APP_NOTIFICATION_ENABLE)
 	Local $botEnable = mknBotSettingGet($APP_NOTIFICATION_ENABLE)
 	If ($enable = 1 Or $botEnable = 1) And $message <> "" Then
 		Local $chatId = mknAppSettingGet($APP_NOTIFICATION_TELEGRAM_CHAT_ID)
 	    Local $botToken = mknAppSettingGet($APP_NOTIFICATION_TELEGRAM_BOT_TOKEN)
 		If $chatId <> "" And $botToken <> "" Then
-			mknTelegramSend($chatId, $botToken, $message, True)
+			If $photo <> "" And FileExists($photo) Then
+				mknTelegramSendPhoto($chatId, $botToken, $photo, $message)
+			Else
+				mknTelegramSend($chatId, $botToken, $message, True)
+			EndIf
 		Else
 			ConsoleWrite("[WARN] Chat ID and token is empty.")
 		EndIf
@@ -44,4 +48,10 @@ Func mknTelegramSend(Const $chatId, Const $botToken, Const $message = "", Const 
 	EndIf
 	Local $body = '{ \"chat_id\": \"' & $chatId & '\", \"text\": \"' & $message & '\", \"disable_notification\": ' & $disableNotification & ' }'
 	ShellExecute(@SystemDir & "\curl.exe", '-XPOST -H "' & $header & '" -d "' & $body & '" ' & $apiUrl, "", "", @SW_HIDE)
+EndFunc
+
+Func mknTelegramSendPhoto(Const $chatId, Const $botToken, Const $photoPath, Const $caption = "")
+	Local $apiUrl = "https://api.telegram.org/bot" & $botToken & "/sendPhoto"
+	Local $params =  '-F "photo=@' & $photoPath & '" -F "chat_id=\"' & $chatId & '\"" -F "caption=\"' & $caption & '\""'
+	ShellExecute(@SystemDir & "\curl.exe", '-XPOST "' & $apiUrl & '" ' & $params, "", "", @SW_HIDE)
 EndFunc

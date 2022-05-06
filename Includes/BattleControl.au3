@@ -1,11 +1,13 @@
-#cs ---------------------------------------------------------------------------- 
- 
- NOTICE: To avoid complexity, 
+#cs ----------------------------------------------------------------------------
+
+ NOTICE: To avoid complexity,
  Please don't use mknStateSet to dispatch state inside this script.
  Recommend: Only use mknStateSet inside *Dispatcher script.
- 
+
 #ce ----------------------------------------------------------------------------
 #include-once
+#include <File.au3>
+#include <ScreenCapture.au3>
 #include <StringConstants.au3>
 #include "WndHelper.au3"
 #include "Libs\Tesseract.au3"
@@ -56,6 +58,28 @@ Func mknBattleRivalGet($hnwd)
         Local $yCoor = mknAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_Y)
         Local $width = mknAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_W)
         Local $height = mknAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_H)
+		Return _TesseractWinCapture(WinGetTitle($hnwd), "", 0, "", 1, 2, $xCoor, $yCoor, $xCoor + $width, $yCoor + $height, 0)
+	EndIf
+	Return ""
+EndFunc
+
+#cs ----------------------------------------------------------------------------
+
+ Version: 0.1.0
+ AutoIt Version: 3.3.16.0
+ Author: pnqphong95
+ Function: mknBattleMessageGet
+ Description: Get last battle message. e.g: ability now Marvel Scale,..
+ Settings: Read settings coordinator x, y, width, height from MonKnife.ini
+
+#ce ----------------------------------------------------------------------------
+Func mknBattleMessageGet($hnwd)
+	If IsHWnd($hnwd) Then
+		_TesseractTempPathSet(@TempDir & "\")
+		Local $xCoor = 350
+        Local $yCoor = 910
+        Local $width = 480
+        Local $height = 60
 		Return _TesseractWinCapture(WinGetTitle($hnwd), "", 0, "", 1, 2, $xCoor, $yCoor, $xCoor + $width, $yCoor + $height, 0)
 	EndIf
 	Return ""
@@ -125,14 +149,13 @@ Func mknBattleRivalQualified(Const $rivalName)
 		Return True
 	EndIf
 	Local $wishlist = mknBotSettingGet($APP_BATTLE_RIVAL_WISHLIST)
-	If $wishlist = "" Then
+	Local $notIgnoreList = mknBotSettingGet($APP_BATTLE_RIVAL_IGNORELIST)
+	If $wishlist = "" And $notIgnoreList = "" Then
 		Return True
 	EndIf
 	Local $wish = StringInStr($wishlist, $rivalName)
-	; Local $notIgnore = Not StringInStr(mknBotSettingGet($APP_BATTLE_RIVAL_IGNORELIST, $name)
-	; Temporarily set skip all if not wish
-	Local $notIgnore = False
-	If $wish Or $notIgnore Then
+	Local $notIgnore = Not StringInStr($notIgnoreList, $rivalName)
+	If $wish Or ($notIgnore And $wishlist = "")  Then
 		Return True
 	EndIf
 	Local $extractedWishList = StringSplit($wishlist, " ")
@@ -143,4 +166,49 @@ Func mknBattleRivalQualified(Const $rivalName)
 		EndIf
 	Next
 	Return False
+EndFunc
+
+#cs ----------------------------------------------------------------------------
+
+ Version: 0.1.0
+ AutoIt Version: 3.3.16.0
+ Author: pnqphong95
+ Function: mknBattleLastMessageMatch
+ Description: Compare last message with keyword in wish last message list.
+
+#ce ----------------------------------------------------------------------------
+Func mknBattleLastMessageMatch(Const $lastMsg)
+	If $lastMsg = "" Then
+		Return True
+	EndIf
+	Local $wishLastMsg = mknBotSettingGet($APP_BATTLE_RIVAL_WISHLASTMSG)
+	If $wishLastMsg = "" Then
+		Return True
+	EndIf
+	If StringInStr($wishLastMsg, $lastMsg) Then
+		Return True
+	EndIf
+	Local $extractedWishList = StringSplit($wishLastMsg, " ")
+	For $i = 1 To $extractedWishList[0]
+		Local $keywordInList = StringInStr($lastMsg, $extractedWishList[$i])
+		If $keywordInList Then
+			Return True
+		EndIf
+	Next
+	Return False
+EndFunc
+
+#cs ----------------------------------------------------------------------------
+
+ Version: 0.1.0
+ AutoIt Version: 3.3.16.0
+ Author: pnqphong95
+ Function: mknBattlePokePreview
+ Description: Capture the pokemon preview dialog
+
+#ce ----------------------------------------------------------------------------
+Func mknBattlePokePreview(Const $app)
+	Local $tempPreviewFile = _TempFile(@TempDir & "\", "proPreview_", ".jpg", Default)
+	_ScreenCapture_CaptureWnd($tempPreviewFile, $app, 880, 260, 1300, 650)
+	Return $tempPreviewFile
 EndFunc
