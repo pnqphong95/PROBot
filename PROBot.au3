@@ -6,7 +6,6 @@
 #include <TrayConstants.au3>
 #include "Includes\Storage\AppConstant.au3"
 #include "Includes\Storage\GlobalStorage.au3"
-#include "Includes\Storage\BotSetting.au3"
 #include "Includes\Storage\AppState.au3"
 #include "Includes\WndHelper.au3"
 #include "Includes\Battle\BattleControl.au3"
@@ -58,9 +57,8 @@ EndFunc
 
 Func pbSettingLoad()
 	setBotSettingPath(@ScriptDir & "\PROBot.ini")
+	setBotScriptingPath($BotScript)
 	initPROBotStorage()
-	pbBotSettingInit($BotScript)
-	pbBotSettingParseActionChain()
 EndFunc
 
 Func pbBotStateSwitch()

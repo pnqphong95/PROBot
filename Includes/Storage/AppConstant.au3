@@ -1,15 +1,5 @@
 #include-once
 
-;~ Bot setting keys
-Global Const $APP_BATTLE_RIVAL_WISHLIST = "app.game.battle.rival.wishlist"
-Global Const $APP_BATTLE_RIVAL_IGNORELIST = "app.game.battle.rival.ignorelist"
-Global Const $APP_BATTLE_RIVAL_WISHLASTMSG = "app.game.battle.rival.wishlastmsg"
-Global Const $APP_BATTLE_ACTION_CHAIN = "app.game.battle.action.chain"
-Global Const $APP_BATTLE_ACTION_RUN_AWAY = "app.game.battle.action.runaway"
-Global Const $APP_SPAWN_START_DIRECTION = "app.game.spawn.direction.start"
-Global Const $APP_SPAWN_SHORTEST_PRESS = "app.game.spawn.press.shortest"
-Global Const $APP_SPAWN_LONGEST_PRESS = "app.game.spawn.press.longest"
-
 ; App State Keys
 Global Const $APP_IN_BATTLE = "app.game.battle.on"
 Global Const $APP_BATTLE_BEGIN = "app.game.battle.on.begin"

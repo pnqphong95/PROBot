@@ -1,5 +1,5 @@
 #include-once
-#include "Includes\Storage\BotSetting.au3"
+#include "Includes\Storage\GlobalStorage.au3"
 #include "Includes\Storage\AppState.au3"
 
 #cs ----------------------------------------------------------------------------
@@ -19,11 +19,11 @@ Func pbSpawnDirectionRelease()
 EndFunc
 
 Func pbSpawnMoving()
-	Local $shortest = pbBotSettingGet($APP_SPAWN_SHORTEST_PRESS)
-	Local $longest = pbBotSettingGet($APP_SPAWN_LONGEST_PRESS)
+	Local $shortest = getBotScripting($BOT_SPAWN_SHORT_PRESS)
+	Local $longest = getBotScripting($BOT_SPAWN_LONG_PRESS)
 	Local $randomPress = Random($shortest, $longest, 1)
 	If pbStateGet($APP_SPAWN_LAST_DIRECTION) = "" Then
-		Local $startDirection = pbBotSettingGet($APP_SPAWN_START_DIRECTION)
+		Local $startDirection = getBotScripting($BOT_SPAWN_START_DIRECTION)
 		If $startDirection <> "" Then
 			pbStateSet($APP_SPAWN_LAST_DIRECTION, $startDirection)
 		EndIf

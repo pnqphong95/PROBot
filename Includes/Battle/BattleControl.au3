@@ -12,7 +12,6 @@
 #include "..\WndHelper.au3"
 #include "..\Libs\Tesseract.au3"
 #include "..\Storage\GlobalStorage.au3"
-#include "..\Storage\BotSetting.au3"
 
 #cs ----------------------------------------------------------------------------
 
@@ -148,8 +147,8 @@ Func pbBattleRivalQualified(Const $rivalName)
 	If $rivalName = "" Then
 		Return True
 	EndIf
-	Local $wishlist = pbBotSettingGet($APP_BATTLE_RIVAL_WISHLIST)
-	Local $notIgnoreList = pbBotSettingGet($APP_BATTLE_RIVAL_IGNORELIST)
+	Local $wishlist = getBotScripting($BOT_BATTLE_DESIRED_OPPONENT)
+	Local $notIgnoreList = getBotScripting($BOT_BATTLE_IGNORED_OPPONENT)
 	If $wishlist = "" And $notIgnoreList = "" Then
 		Return True
 	EndIf
@@ -181,7 +180,7 @@ Func pbBattleLastMessageMatch(Const $lastMsg)
 	If $lastMsg = "" Then
 		Return True
 	EndIf
-	Local $wishLastMsg = pbBotSettingGet($APP_BATTLE_RIVAL_WISHLASTMSG)
+	Local $wishLastMsg = getBotScripting($BOT_BATTLE_DESIRED_MESSAGE)
 	If $wishLastMsg = "" Then
 		Return True
 	EndIf
@@ -211,4 +210,25 @@ Func pbBattlePokePreview(Const $app)
 	Local $tempPreviewFile = _TempFile(@TempDir & "\", "proPreview_", ".jpg", Default)
 	_ScreenCapture_CaptureWnd($tempPreviewFile, $app, 880, 260, 1300, 650)
 	Return $tempPreviewFile
+EndFunc
+
+#cs ----------------------------------------------------------------------------
+
+ Version: 0.1.0
+ AutoIt Version: 3.3.16.0
+ Author: pnqphong95
+ Function: pbBattleSendAutomateAction
+ Description: Send automate action to game client
+
+#ce ----------------------------------------------------------------------------
+Func pbBattleSendAutomateAction(Const $actionType, $action = '', $choice = '')
+	If $action <> "" And $choice <> "" Then
+		ConsoleWrite('[Action ' & $actionType & '] Sent key ' & $action & ' and ' & $choice & @CRLF)
+		Send("{" & $action &" 1}")
+		Sleep(Random(500, 1000, 1))	
+		Send("{" & $choice &" 1}")
+		Sleep(Random(500, 1000, 1))
+	Else
+		ConsoleWrite('[Action ' & $actionType & '] Failed to send ' & $action & ' and ' & $choice & @CRLF)
+	EndIf
 EndFunc

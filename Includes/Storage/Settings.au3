@@ -1,12 +1,13 @@
 #include-once
 #include <MsgBoxConstants.au3>
+#include "IniDictHelper.au3"
 
+Global $BOT_SETTING_PATH
 Global $PROBotSetting = ObjCreate("Scripting.Dictionary")
 
-;~ Game client title
-Global Const $CLIENT_TITLE = "client.title"
-$PROBotSetting.Add($CLIENT_TITLE, "PROClient")
-
+Func setBotSettingPath(Const $path)
+    $BOT_SETTING_PATH = $path
+EndFunc
 
 ;~ Bot notification setting group
 Global Const $BOT_NOTIFICATION_ENABLE = "bot.notification.enable"
@@ -15,6 +16,11 @@ Global Const $BOT_NOTIFICATION_TELEGRAM_BOT_TOKEN = "bot.notification.telegram.b
 $PROBotSetting.Add($BOT_NOTIFICATION_ENABLE, 0)
 $PROBotSetting.Add($BOT_NOTIFICATION_TELEGRAM_CHAT_ID, "")
 $PROBotSetting.Add($BOT_NOTIFICATION_TELEGRAM_BOT_TOKEN, "")
+
+
+;~ Game client title
+Global Const $CLIENT_TITLE = "client.title"
+$PROBotSetting.Add($CLIENT_TITLE, "PROClient")
 
 
 ;~ Game client, battle dialog topbar coordinator
@@ -56,38 +62,29 @@ $PROBotSetting.Add($CLIENT_BATTLE_ACTION_WIDTH, 2)
 $PROBotSetting.Add($CLIENT_BATTLE_ACTION_HEIGHT, 1)
 $PROBotSetting.Add($CLIENT_BATTLE_ACTION_COLOR, "0x8f8f8f")
 
-Func settingSectionInit(Const $path, Const $section)
-    If Not FileExists($path) Then
-        ConsoleWrite($path & @CRLF & "File doesn't exist. Auto-create " & $section & " with default value!" & @CRLF)
-        For $key In $PROBotSetting
-            IniWrite($path, $section, $key, $PROBotSetting.Item($key))
-        Next
-        Return
-    EndIf
-    Local $settingSection = IniReadSection($path, $section)
-    If @error Or $settingSection[0][0] = 0 Then
-        ConsoleWrite($path & @CRLF & $section & " is corrupted or empty. Auto-create " & $section & " setting with default value!" & @CRLF)
-        For $key In $PROBotSetting
-            IniWrite($path, $section, $key, $PROBotSetting.Item($key))
-        Next
-        Return
-    EndIf
-    For $i = 1 To $settingSection[0][0]
-        Local $key = $settingSection[$i][0]
-        Local $overwrittenValue = $settingSection[$i][1]
-        Local $oldValue = $PROBotSetting.Item($key)
-        If $overwrittenValue <> "" And $overwrittenValue <> $oldValue Then
-            Local $oldValue = $PROBotSetting.Item($key)
-            $PROBotSetting.Item($key) = $overwrittenValue
-            ConsoleWrite("Resolved [" & $section & "] " & $key & " = " & $overwrittenValue & @CRLF)
-        Else
-            ConsoleWrite("Resolved [" & $section & "] " & $key & " = " & $oldValue & @CRLF)
-        EndIf
-    Next
-EndFunc
 
-Func settingInit(Const $path)
-    settingSectionInit($path, "BotSettings")
+;~ Game client, keyboard setting
+;~ Bot used to send correct key to game client
+Global Const $CLIENT_BATTLE_ACTION_KEY = "client.battle.action.key"
+Global Const $CLIENT_BATTLE_ACTION_KEY_1 = $CLIENT_BATTLE_ACTION_KEY & ".1"
+Global Const $CLIENT_BATTLE_ACTION_KEY_2 = $CLIENT_BATTLE_ACTION_KEY & ".2"
+Global Const $CLIENT_BATTLE_ACTION_KEY_3 = $CLIENT_BATTLE_ACTION_KEY & ".3"
+Global Const $CLIENT_BATTLE_ACTION_KEY_4 = $CLIENT_BATTLE_ACTION_KEY & ".4"
+Global Const $CLIENT_BATTLE_ACTION_KEY_5 = $CLIENT_BATTLE_ACTION_KEY & ".5"
+Global Const $CLIENT_BATTLE_ACTION_KEY_6 = $CLIENT_BATTLE_ACTION_KEY & ".6"
+$PROBotSetting.Add($CLIENT_BATTLE_ACTION_KEY_1, "Z")
+$PROBotSetting.Add($CLIENT_BATTLE_ACTION_KEY_2, "X")
+$PROBotSetting.Add($CLIENT_BATTLE_ACTION_KEY_3, "C")
+$PROBotSetting.Add($CLIENT_BATTLE_ACTION_KEY_4, "V")
+$PROBotSetting.Add($CLIENT_BATTLE_ACTION_KEY_5, "B")
+$PROBotSetting.Add($CLIENT_BATTLE_ACTION_KEY_6, "N")
+
+Func initSetting()
+    If $BOT_SETTING_PATH = "" Then
+        MsgBox($MB_SYSTEMMODAL, "Initializing Error", "$BOT_SETTING_PATH is empty. Please set a value")
+        Exit
+    EndIf
+    loadIniSection($PROBotSetting, $BOT_SETTING_PATH, "BotSettings")
 EndFunc
 
 Func getBotSetting(Const $settingKey)

@@ -1,7 +1,6 @@
 #include-once
 #include "Storage\AppConstant.au3"
 #include "Storage\GlobalStorage.au3"
-#include "Storage\BotSetting.au3"
 
 Func pbNotifyPokemonActionChainProcessing(Const $pokemon)
     If $pokemon <> "" Then

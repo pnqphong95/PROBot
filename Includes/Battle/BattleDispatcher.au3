@@ -1,5 +1,5 @@
 #include-once
-#include "..\Storage\BotSetting.au3"
+#include "..\Storage\GlobalStorage.au3"
 #include "..\Storage\AppState.au3"
 #include "..\NotificationHelper.au3"
 #include "BattleControl.au3"
@@ -83,7 +83,7 @@ Func pbBattleHandler(Const $app)
 		Case "RUN_AWAY"
 			pbBattleRunAway($app)
 		Case "ACTION_CHAIN"
-			pbBattleActionChain($app)
+			pbBattleScriptingAction($app)
 		Case "HOLD_ON"
 		Case Else
 			; Leave the control to the user
@@ -100,7 +100,7 @@ EndFunc
 
 #ce ----------------------------------------------------------------------------
 Func pbBattleRunAway(Const $app)
-	Local $runAwayAction = pbBotSettingGet($APP_BATTLE_ACTION_RUN_AWAY)
+	Local $runAwayAction = getBotScripting($BOT_BATTLE_ACTION_EXIT)
 	If $runAwayAction <> "" Then
 		pbBattleWaitForActionReadyDispatch($app, 1000)
 		If pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
@@ -116,59 +116,76 @@ EndFunc
  Version: 0.1.0
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
- Function: pbBattleRunAway
+ Function: pbBattleScriptingAction
  Description: Magic function to perform auto catch,
  steps is configured by user (Configure auto catch action via Default-Bot.ini)
 
 #ce ----------------------------------------------------------------------------
-Func pbBattleActionChain(Const $app)
-	Local $actions = pbBotActionChainGet()
+Func pbBattleScriptingAction(Const $app)
 	If pbStateGet($APP_IN_BATTLE) Then
+		Local $sentAction = '', $sentChoice = ''
 		pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
-		For $actionKey In $actions 
-			Local $keys = StringSplit($actionKey, '')
+		For $action In $BattleAutomateAction
+			;~ Action format: StepNumber_ActionType
+    		Local $actionType = StringSplit($action, "_")[2]
+			Local $actionChoice = Number($BattleAutomateAction.Item($action))
+			Local $actionKey = resolveActionKey($actionType)
+			Local $choiceKey = resolveChoiceKey($actionType, $actionChoice)
 			pbBattleWaitForActionReadyDispatch($app, 1000)
 			If Not pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
 				pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
 				ExitLoop
 			EndIf
-			For $keyNum = 1 To $keys[0]
-				Send("{" & $keys[$keyNum] &" 1}")
-				Sleep(Random(500, 1000, 1))
-				ConsoleWrite("Sent key " & $keys[$keyNum] & ".." & @CRLF)			
-			Next
-			pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
-			Local $retryTime = Number($actions.Item($actionKey))
-			If $retryTime > 1 Then
-				pbBattleWaitScreenClose($app, 1000)
-				If pbStateGet($APP_IN_BATTLE) Then
-					Local $retryCount = 1
-					While $retryCount < $retryTime
-						pbBattleWaitForActionReadyDispatch($app, 1000)
-						If Not pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
-							pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
-							ExitLoop
-						EndIf
-						For $keyNum = 1 To $keys[0]
-							Sleep(Random(500, 1000, 1))
-							Send("{" & $keys[$keyNum] &" 1}")
-							ConsoleWrite("Retried key " & $keys[$keyNum] & ".." & @CRLF)			
-						Next
-						pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
-						$retryCount = $retryCount + 1			
-					WEnd
-				Else
-					ExitLoop
-				EndIf
-			EndIf
+			Switch ($actionType)
+				Case $CLIENT_BATTLE_ACTION_POKEMON, $CLIENT_BATTLE_ACTION_FIGHT, $CLIENT_BATTLE_ACTION_ITEM
+					$sentAction = $actionKey
+					$sentChoice = $choiceKey
+					pbBattleSendAutomateAction($actionType, $sentAction, $sentChoice)
+					pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
+				Case $CLIENT_BATTLE_ACTION_RETRY
+					Local $retryTime = $actionChoice
+					pbBattleRetryAction($app, $retryTime, $actionType, $sentAction, $sentChoice)
+				Case Else
+			EndSwitch
 		Next
-		pbBattleWaitScreenClose($app, 1000)
+		pbBattleWaitScreenClose($app, 1000, 30)
 		If pbStateGet($APP_IN_BATTLE) Then
 			pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
 			pbNotifyPokemonUncaught(pbStateGet($APP_BATTLE_TITLE))
 		Else
 			Local $previewFile = pbBattlePokePreview($app)
 			pbNotifyPokemonCaught(pbStateGet($APP_BATTLE_TITLE), $previewFile)
+		EndIf
+	EndIf
+EndFunc
+
+
+#cs ----------------------------------------------------------------------------
+
+ Version: 0.1.0
+ AutoIt Version: 3.3.16.0
+ Author: pnqphong95
+ Function: pbBattleRetryAction
+ Description: Internal function perform retry battle action 
+
+#ce ----------------------------------------------------------------------------
+Func pbBattleRetryAction(Const $app, Const $retryTime, Const $actionType, Const $sentAction, Const $sentChoice)
+	If $retryTime > 1 Then
+		pbBattleWaitScreenClose($app, 1000, 8)
+		If pbStateGet($APP_IN_BATTLE) Then
+			Local $retryCount = 0
+			While $retryCount < $retryTime
+				pbBattleWaitScreenClose($app, 1000, 8)
+				If pbStateGet($APP_IN_BATTLE) Then
+					pbBattleWaitForActionReadyDispatch($app, 1000)
+					If Not pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
+						pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
+						ExitLoop
+					EndIf
+					pbBattleSendAutomateAction($actionType, $sentAction, $sentChoice)
+					$retryCount = $retryCount + 1
+				EndIf
+			WEnd
 		EndIf
 	EndIf
 EndFunc
@@ -193,9 +210,6 @@ Func pbBattleWaitForActionReadyDispatch(Const $app, Const $interval = 3000, Cons
 			Sleep($interval)
 			$elapsed = TimerDiff($timer)
 		WEnd
-		If $ready Then
-			ConsoleWrite("Battle action ready .." & $ready & @CRLF)
-		EndIf
 		pbStateSet($APP_BATTLE_CONTROLLER_READY, $ready)
 	EndIf
 EndFunc
@@ -220,9 +234,6 @@ Func pbBattleWaitScreenClose(Const $app, Const $interval = 3000, Const $waitSec 
 			Sleep($interval)
 			$elapsed = TimerDiff($timer)
 		WEnd
-		If $closed Then
-			ConsoleWrite("Battle screen close .." & $closed & @CRLF)
-		EndIf
 		pbStateSet($APP_IN_BATTLE, Not $closed)
 	EndIf
 EndFunc
