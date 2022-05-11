@@ -9,10 +9,10 @@
 #include <File.au3>
 #include <ScreenCapture.au3>
 #include <StringConstants.au3>
-#include "WndHelper.au3"
-#include "Libs\Tesseract.au3"
-#include "Storage\AppSetting.au3"
-#include "Storage\BotSetting.au3"
+#include "..\WndHelper.au3"
+#include "..\Libs\Tesseract.au3"
+#include "..\Storage\GlobalStorage.au3"
+#include "..\Storage\BotSetting.au3"
 
 #cs ----------------------------------------------------------------------------
 
@@ -30,11 +30,11 @@ Func pbBattleIsDisplayed($hnwd)
 		; 2 =  relative coords to the client area of the defined window.
 		activateWindow($hnwd)
 		Opt("PixelCoordMode", 2)
-		Local $color = pbAppSettingGet($APP_BATTLE_IDENTIFIER_COLOR)
-        Local $xCoor = pbAppSettingGet($APP_BATTLE_IDENTIFIER_X)
-        Local $yCoor = pbAppSettingGet($APP_BATTLE_IDENTIFIER_Y)
-        Local $width = pbAppSettingGet($APP_BATTLE_IDENTIFIER_W)
-        Local $height = pbAppSettingGet($APP_BATTLE_IDENTIFIER_H)
+		Local $color = getBotSetting($CLIENT_BATTLE_TOPBAR_COLOR)
+        Local $xCoor = getBotSetting($CLIENT_BATTLE_TOPBAR_X)
+        Local $yCoor = getBotSetting($CLIENT_BATTLE_TOPBAR_Y)
+        Local $width = getBotSetting($CLIENT_BATTLE_TOPBAR_WIDTH)
+        Local $height = getBotSetting($CLIENT_BATTLE_TOPBAR_HEIGHT)
         Local $resultCoor = PixelSearch($xCoor, $yCoor, $xCoor + $width, $yCoor + $height, $color, 1, 1, $hnwd)
 		Return Not @error
 	EndIf
@@ -54,10 +54,10 @@ EndFunc
 Func pbBattleRivalGet($hnwd)
 	If IsHWnd($hnwd) Then
 		_TesseractTempPathSet(@TempDir & "\")
-		Local $xCoor = pbAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_X)
-        Local $yCoor = pbAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_Y)
-        Local $width = pbAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_W)
-        Local $height = pbAppSettingGet($APP_BATTLE_RIVAL_IDENTIFIER_H)
+		Local $xCoor = getBotSetting($CLIENT_BATTLE_TITLE_X)
+        Local $yCoor = getBotSetting($CLIENT_BATTLE_TITLE_Y)
+        Local $width = getBotSetting($CLIENT_BATTLE_TITLE_WIDTH)
+        Local $height = getBotSetting($CLIENT_BATTLE_TITLE_HEIGHT)
 		Return _TesseractWinCapture(WinGetTitle($hnwd), "", 0, "", 1, 2, $xCoor, $yCoor, $xCoor + $width, $yCoor + $height, 0)
 	EndIf
 	Return ""
@@ -124,11 +124,11 @@ Func pbBattleControlable($hnwd)
 		; 2 =  relative coords to the client area of the defined window.
 		activateWindow($hnwd)
 		Opt("PixelCoordMode", 2)
-		Local $color = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_COLOR)
-        Local $xCoor = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_X)
-        Local $yCoor = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_Y)
-        Local $width = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_W)
-        Local $height = pbAppSettingGet($APP_BATTLE_CONTROLABLE_IDENTIFIER_H)
+		Local $color = getBotSetting($CLIENT_BATTLE_ACTION_COLOR)
+        Local $xCoor = getBotSetting($CLIENT_BATTLE_ACTION_X)
+        Local $yCoor = getBotSetting($CLIENT_BATTLE_ACTION_Y)
+        Local $width = getBotSetting($CLIENT_BATTLE_ACTION_WIDTH)
+        Local $height = getBotSetting($CLIENT_BATTLE_ACTION_HEIGHT)
         Local $resultCoor = PixelSearch($xCoor, $yCoor, $xCoor + $width, $yCoor + $height, $color, 1, 1, $hnwd)
 		Return Not @error
 	EndIf

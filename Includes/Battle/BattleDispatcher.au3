@@ -1,9 +1,8 @@
 #include-once
-#include "Includes\Storage\AppSetting.au3"
-#include "Includes\Storage\BotSetting.au3"
-#include "Includes\Storage\AppState.au3"
-#include "Includes\NotificationHelper.au3"
-#include "Includes\BattleControl.au3"
+#include "..\Storage\BotSetting.au3"
+#include "..\Storage\AppState.au3"
+#include "..\NotificationHelper.au3"
+#include "BattleControl.au3"
 
 #cs ----------------------------------------------------------------------------
 

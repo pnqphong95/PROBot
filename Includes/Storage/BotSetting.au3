@@ -6,7 +6,6 @@ Global $pbBotActionChain = ObjCreate("Scripting.Dictionary")
 
 ; Default bot settings
 ; ====================
-$pbBotSettings.Add($APP_NOTIFICATION_ENABLE, 0)
 $pbBotSettings.Add($APP_BATTLE_ACTION_CHAIN, "")
 $pbBotSettings.Add($APP_BATTLE_ACTION_RUN_AWAY, "")
 $pbBotSettings.Add($APP_BATTLE_RIVAL_WISHLIST, "")

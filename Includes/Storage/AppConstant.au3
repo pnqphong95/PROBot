@@ -1,25 +1,5 @@
 #include-once
 
-;~ App Setting Keys, must change corresponding value in PROBot.ini if modify these values
-Global Const $APP_TITLE = "app.title"
-Global Const $APP_NOTIFICATION_ENABLE = "app.game.notification.enable"
-Global Const $APP_NOTIFICATION_TELEGRAM_CHAT_ID = "app.game.notification.telegram.chatid"
-Global Const $APP_NOTIFICATION_TELEGRAM_BOT_TOKEN = "app.game.notification.telegram.bottoken"
-Global Const $APP_BATTLE_IDENTIFIER_X = "app.game.battle.identifier.x"
-Global Const $APP_BATTLE_IDENTIFIER_Y = "app.game.battle.identifier.y"
-Global Const $APP_BATTLE_IDENTIFIER_W = "app.game.battle.identifier.w"
-Global Const $APP_BATTLE_IDENTIFIER_H = "app.game.battle.identifier.h"
-Global Const $APP_BATTLE_IDENTIFIER_COLOR = "app.game.battle.identifier.color"
-Global Const $APP_BATTLE_RIVAL_IDENTIFIER_X = "app.game.battle.rival.identifier.x"
-Global Const $APP_BATTLE_RIVAL_IDENTIFIER_Y = "app.game.battle.rival.identifier.y"
-Global Const $APP_BATTLE_RIVAL_IDENTIFIER_W = "app.game.battle.rival.identifier.w"
-Global Const $APP_BATTLE_RIVAL_IDENTIFIER_H = "app.game.battle.rival.identifier.h"
-Global Const $APP_BATTLE_CONTROLABLE_IDENTIFIER_X = "app.game.battle.controlable.identifier.x"
-Global Const $APP_BATTLE_CONTROLABLE_IDENTIFIER_Y = "app.game.battle.controlable.identifier.y"
-Global Const $APP_BATTLE_CONTROLABLE_IDENTIFIER_W = "app.game.battle.controlable.identifier.w"
-Global Const $APP_BATTLE_CONTROLABLE_IDENTIFIER_H = "app.game.battle.controlable.identifier.h"
-Global Const $APP_BATTLE_CONTROLABLE_IDENTIFIER_COLOR = "app.game.battle.controlable.identifier.color"
-
 ;~ Bot setting keys
 Global Const $APP_BATTLE_RIVAL_WISHLIST = "app.game.battle.rival.wishlist"
 Global Const $APP_BATTLE_RIVAL_IGNORELIST = "app.game.battle.rival.ignorelist"

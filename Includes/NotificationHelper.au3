@@ -1,6 +1,6 @@
 #include-once
 #include "Storage\AppConstant.au3"
-#include "Storage\AppSetting.au3"
+#include "Storage\GlobalStorage.au3"
 #include "Storage\BotSetting.au3"
 
 Func pbNotifyPokemonActionChainProcessing(Const $pokemon)
@@ -22,11 +22,10 @@ Func pbNotifyPokemonUncaught(Const $pokemon)
 EndFunc
 
 Func pbSendMessage(Const $message, Const $photo = "")
-	Local $enable = pbAppSettingGet($APP_NOTIFICATION_ENABLE)
-	Local $botEnable = pbBotSettingGet($APP_NOTIFICATION_ENABLE)
-	If ($enable = 1 Or $botEnable = 1) And $message <> "" Then
-		Local $chatId = pbAppSettingGet($APP_NOTIFICATION_TELEGRAM_CHAT_ID)
-	    Local $botToken = pbAppSettingGet($APP_NOTIFICATION_TELEGRAM_BOT_TOKEN)
+	Local $enable = getBotSetting($BOT_NOTIFICATION_ENABLE)
+	If $enable = 1 And $message <> "" Then
+		Local $chatId = getBotSetting($BOT_NOTIFICATION_TELEGRAM_CHAT_ID)
+	    Local $botToken = getBotSetting($BOT_NOTIFICATION_TELEGRAM_BOT_TOKEN)
 		If $chatId <> "" And $botToken <> "" Then
 			If $photo <> "" And FileExists($photo) Then
 				pbTelegramSendPhoto($chatId, $botToken, $photo, $message)
