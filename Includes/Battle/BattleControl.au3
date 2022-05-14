@@ -20,7 +20,7 @@
  Author: pnqphong95
  Function: pbBattleIsDisplayed
  Description: Search if battle dialog is displayed on given window screen.
- Settings: Read settings coordinator x, y, width, height from PROBot.ini
+ Settings: Read settings coordinator x, y, width, height from Settings.ini
 
 #ce ----------------------------------------------------------------------------
 Func pbBattleIsDisplayed($hnwd)
@@ -47,7 +47,7 @@ EndFunc
  Author: pnqphong95
  Function: pbBattleRivalGet
  Description: Get battle rival. e.g: Wild pokemon,..
- Settings: Read settings coordinator x, y, width, height from PROBot.ini
+ Settings: Read settings coordinator x, y, width, height from Settings.ini
 
 #ce ----------------------------------------------------------------------------
 Func pbBattleRivalGet($hnwd)
@@ -69,7 +69,7 @@ EndFunc
  Author: pnqphong95
  Function: pbBattleMessageGet
  Description: Get last battle message. e.g: ability now Marvel Scale,..
- Settings: Read settings coordinator x, y, width, height from PROBot.ini
+ Settings: Read settings coordinator x, y, width, height from Settings.ini
 
 #ce ----------------------------------------------------------------------------
 Func pbBattleMessageGet($hnwd)
@@ -114,7 +114,7 @@ EndFunc
  Author: pnqphong95
  Function: pbBattleControlable
  Description: Check if battle is able to receive input from PROBot
- Settings: Read settings coordinator x, y, width, height from PROBot.ini
+ Settings: Read settings coordinator x, y, width, height from Settings.ini
 
 #ce ----------------------------------------------------------------------------
 Func pbBattleControlable($hnwd)
@@ -128,7 +128,7 @@ Func pbBattleControlable($hnwd)
         Local $yCoor = getBotSetting($CLIENT_BATTLE_ACTION_Y)
         Local $width = getBotSetting($CLIENT_BATTLE_ACTION_WIDTH)
         Local $height = getBotSetting($CLIENT_BATTLE_ACTION_HEIGHT)
-        Local $resultCoor = PixelSearch($xCoor, $yCoor, $xCoor + $width, $yCoor + $height, $color, 1, 1, $hnwd)
+        Local $resultCoor = PixelSearch($xCoor, $yCoor, $xCoor + $width, $yCoor + $height, $color, 3, 1, $hnwd)
 		Return Not @error
 	EndIf
 	Return False
@@ -223,12 +223,9 @@ EndFunc
 #ce ----------------------------------------------------------------------------
 Func pbBattleSendAutomateAction(Const $actionType, $action = '', $choice = '')
 	If $action <> "" And $choice <> "" Then
-		ConsoleWrite('[Action ' & $actionType & '] Sent key ' & $action & ' and ' & $choice & @CRLF)
 		Send("{" & $action &" 1}")
 		Sleep(Random(500, 1000, 1))	
 		Send("{" & $choice &" 1}")
 		Sleep(Random(500, 1000, 1))
-	Else
-		ConsoleWrite('[Action ' & $actionType & '] Failed to send ' & $action & ' and ' & $choice & @CRLF)
 	EndIf
 EndFunc

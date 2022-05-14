@@ -1,6 +1,13 @@
 #include-once
 
 ; App State Keys
+Global Const $BOT_NOTIFICATION_ENABLE = "bot.notification.enable"
+Global Const $BOT_NOTIFICATION_POKEMON_PREVIEW = "bot.notification.pokemon.preview"
+Global Const $BOT_SESSION_FIRST_LOAD = "bot.session.firstload"
+Global Const $BOT_SESSION_SCRIPT = "bot.session.script"
+Global Const $BOT_SESSION_SCRIPT_IN_USE = "bot.session.script.inuse"
+Global Const $BOT_SESSION_STATE = "bot.session.state"
+Global Const $BOT_SESSION_SWITCH_STATE_ATTEMPT = "bot.session.switch.state.attempt"
 Global Const $APP_IN_BATTLE = "app.game.battle.on"
 Global Const $APP_BATTLE_BEGIN = "app.game.battle.on.begin"
 Global Const $APP_BATTLE_END = "app.game.battle.on.end"

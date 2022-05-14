@@ -1,28 +1,22 @@
 #include-once
 #include "Storage\AppConstant.au3"
 #include "Storage\GlobalStorage.au3"
+#include "Storage\AppState.au3"
 
-Func pbNotifyPokemonActionChainProcessing(Const $pokemon)
-    If $pokemon <> "" Then
-        pbSendMessage($pokemon & " attacks! Action chain process..")
+Func pbNotifyBattleClosed(Const $pokemon, Const $photoPath = "")
+    If $pokemon <> "" And pbStateGet($BOT_NOTIFICATION_ENABLE) Then
+		pbSendMessage("[" & $pokemon & "] Battle successfully closed.", $photoPath)
     EndIf
 EndFunc
 
-Func pbNotifyPokemonCaught(Const $pokemon, Const $photoPath = "")
-    If $pokemon <> "" Then
-        pbSendMessage("Gotcha! " & $pokemon & " caught.", $photoPath)
-    EndIf
-EndFunc
-
-Func pbNotifyPokemonUncaught(Const $pokemon)
-    If $pokemon <> "" Then
-        pbSendMessage("Can not catch " & $pokemon & " automatically! Hold-on")
+Func pbNotifyBattleNotClosed(Const $pokemon)
+    If $pokemon <> "" And pbStateGet($BOT_NOTIFICATION_ENABLE) Then
+        pbSendMessage("[" & $pokemon & "] Battle not closed yet!")
     EndIf
 EndFunc
 
 Func pbSendMessage(Const $message, Const $photo = "")
-	Local $enable = getBotSetting($BOT_NOTIFICATION_ENABLE)
-	If $enable = 1 And $message <> "" Then
+	If $message <> "" Then
 		Local $chatId = getBotSetting($BOT_NOTIFICATION_TELEGRAM_CHAT_ID)
 	    Local $botToken = getBotSetting($BOT_NOTIFICATION_TELEGRAM_BOT_TOKEN)
 		If $chatId <> "" And $botToken <> "" Then

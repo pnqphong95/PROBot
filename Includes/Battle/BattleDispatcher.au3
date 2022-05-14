@@ -13,7 +13,7 @@
  Description: Scan the screen and dispatch screen state to AppState.au3
 
 #ce ----------------------------------------------------------------------------
-Func pbBattleScreenDispatch(Const $hwnd, Const $logFile)
+Func pbBattleScreenDispatch(Const $hwnd)
     pbStateSet($APP_BATTLE_BEGIN, False)
 	pbStateSet($APP_BATTLE_END, False)
     Local Const $isDisplayed = pbBattleIsDisplayed($hwnd)
@@ -37,7 +37,6 @@ Func pbBattleScreenDispatch(Const $hwnd, Const $logFile)
 		Local Const $rival = pbBattleRivalGet($hwnd)
 		pbStateSet($APP_BATTLE_TITLE_RAWTEXT, $rival)
 		pbStateSet($APP_BATTLE_TITLE, pbBattleWildPokemonNameExtract($rival))
-        FileWriteLine($logFile, $rival)
 	EndIf
 EndFunc
 
@@ -59,11 +58,10 @@ Func pbBattleRivalEvaluationDispatch(Const $app)
 		If pbBattleRivalQualified($rivalName) Then
 			pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
 			pbBattleWaitForActionReadyDispatch($app, 1000, 30)
-			Local Const $lastMessage = pbBattleMessageGet($app)
-			Local Const $matched = pbBattleLastMessageMatch($lastMessage)
+			Local $lastMessage = pbBattleMessageGet($app)
+			Local $matched = pbBattleLastMessageMatch($lastMessage)
 			If $matched Then
 				pbStateSet($APP_BATTLE_DECISION, "ACTION_CHAIN")
-				pbNotifyPokemonActionChainProcessing(pbStateGet($APP_BATTLE_TITLE))
 			EndIf
 		EndIf
 	EndIf
@@ -104,9 +102,7 @@ Func pbBattleRunAway(Const $app)
 	If $runAwayAction <> "" Then
 		pbBattleWaitForActionReadyDispatch($app, 1000)
 		If pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
-			Local $randomSendTimes = Random(1, 3, 1)
-			Send("{" & $runAwayAction & " " & $randomSendTimes & "}")
-			;~ Send key press in random times, check runAwayAction in Default-Bot.ini settings
+			Send("{" & $runAwayAction & " 1}")
 		EndIf
 	EndIf 
 EndFunc
@@ -123,38 +119,75 @@ EndFunc
 #ce ----------------------------------------------------------------------------
 Func pbBattleScriptingAction(Const $app)
 	If pbStateGet($APP_IN_BATTLE) Then
-		Local $sentAction = '', $sentChoice = ''
+		Local $sentAction = '', $sentValue = '', $lastAction, $lastActionType
 		pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
 		For $action In $BattleAutomateAction
 			;~ Action format: StepNumber_ActionType
-    		Local $actionType = StringSplit($action, "_")[2]
-			Local $actionChoice = Number($BattleAutomateAction.Item($action))
+    		Local $actionType = StringSplit($action, "-")[2]
+			Local $dictValue = $BattleAutomateAction.Item($action)
+			Local $actionChoice = Number($dictValue)
 			Local $actionKey = resolveActionKey($actionType)
-			Local $choiceKey = resolveChoiceKey($actionType, $actionChoice)
-			pbBattleWaitForActionReadyDispatch($app, 1000)
-			If Not pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
-				pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
-				ExitLoop
-			EndIf
+			Local $actionValue = resolveActionValue($actionType, $actionChoice)
 			Switch ($actionType)
-				Case $CLIENT_BATTLE_ACTION_POKEMON, $CLIENT_BATTLE_ACTION_FIGHT, $CLIENT_BATTLE_ACTION_ITEM
+				Case $CLIENT_BATTLE_ACTION_CR
+					ConsoleWrite('[Action ' & $action & '] Waiting action ready ' & @CRLF)
+					pbBattleWaitForActionReadyDispatch($app, 1000, $actionValue)
+					If Not pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
+						ConsoleWrite('[Action ' & $action & '] Waited ' & $actionValue & ', but action not ready ' & @CRLF)
+						pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
+						ExitLoop
+					EndIf
+				Case $CLIENT_BATTLE_ACTION_CB
+					ConsoleWrite('[Action ' & $action & '] Waiting battle close ' & @CRLF)
+					pbBattleWaitScreenClose($app, 1000, $actionValue)
+					If Not pbStateGet($APP_IN_BATTLE) Then
+						ConsoleWrite('[Action ' & $action & '] Battle closed after ' & $actionValue & ' seconds.' & @CRLF)
+						ExitLoop
+					Else
+						Local $lastMessage = pbBattleMessageGet($app)
+						Local $noPPLeft = StringInStr($lastMessage, "no PP")
+						If Not @error And $noPPLeft > 0 Then
+							removeClosableBattleAction($lastAction)
+						EndIf
+					EndIf
+				Case $CLIENT_BATTLE_ACTION_POKEMON
+					ConsoleWrite('[Action ' & $action & '] Send Pokemon #' & $actionChoice & @CRLF)
+					$lastAction = $action
 					$sentAction = $actionKey
-					$sentChoice = $choiceKey
-					pbBattleSendAutomateAction($actionType, $sentAction, $sentChoice)
+					$sentValue = $actionValue
+					pbBattleSendAutomateAction($actionType, $sentAction, $sentValue)
+					pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
+				Case $CLIENT_BATTLE_ACTION_FIGHT
+					ConsoleWrite('[Action ' & $action & '] Use move #' & $actionChoice & @CRLF)
+					$lastAction = $action
+					$sentAction = $actionKey
+					$sentValue = $actionValue
+					pbBattleSendAutomateAction($actionType, $sentAction, $sentValue)
+					pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
+				Case $CLIENT_BATTLE_ACTION_ITEM
+					ConsoleWrite('[Action ' & $action & '] Use item #' & $actionChoice & @CRLF)
+					$lastAction = $action
+					$sentAction = $actionKey
+					$sentValue = $actionValue
+					pbBattleSendAutomateAction($actionType, $sentAction, $sentValue)
 					pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
 				Case $CLIENT_BATTLE_ACTION_RETRY
+					ConsoleWrite('[Action ' & $action & '] Will retry action ' & $lastAction & @CRLF)
 					Local $retryTime = $actionChoice
-					pbBattleRetryAction($app, $retryTime, $actionType, $sentAction, $sentChoice)
+					pbBattleRetryAction($app, $retryTime, $actionType, $sentAction, $sentValue)
 				Case Else
 			EndSwitch
 		Next
-		pbBattleWaitScreenClose($app, 1000, 30)
 		If pbStateGet($APP_IN_BATTLE) Then
 			pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
-			pbNotifyPokemonUncaught(pbStateGet($APP_BATTLE_TITLE))
+			pbNotifyBattleNotClosed(pbStateGet($APP_BATTLE_TITLE))
 		Else
-			Local $previewFile = pbBattlePokePreview($app)
-			pbNotifyPokemonCaught(pbStateGet($APP_BATTLE_TITLE), $previewFile)
+			If pbStateGet($BOT_NOTIFICATION_POKEMON_PREVIEW) Then
+				Local $previewFile = pbBattlePokePreview($app)
+				pbNotifyBattleClosed(pbStateGet($APP_BATTLE_TITLE), $previewFile)
+			Else
+				pbNotifyBattleClosed(pbStateGet($APP_BATTLE_TITLE))
+			EndIf
 		EndIf
 	EndIf
 EndFunc
@@ -207,9 +240,13 @@ Func pbBattleWaitForActionReadyDispatch(Const $app, Const $interval = 3000, Cons
 		Local $ready = False
 		While Not $ready And $elapsed < $waitSec * 1000
 			$ready = pbBattleControlable($app)
+			If Not $ready Then
+				ConsoleWrite(".")
+			EndIf
 			Sleep($interval)
 			$elapsed = TimerDiff($timer)
 		WEnd
+		ConsoleWrite(@CRLF)
 		pbStateSet($APP_BATTLE_CONTROLLER_READY, $ready)
 	EndIf
 EndFunc
@@ -227,13 +264,17 @@ EndFunc
 #ce ----------------------------------------------------------------------------
 Func pbBattleWaitScreenClose(Const $app, Const $interval = 3000, Const $waitSec = 90)
 	If pbStateGet($APP_IN_BATTLE) Then
-        Local $elapsed = 0, $timer = TimerInit()
+		Local $elapsed = 0, $timer = TimerInit()
 		Local $closed = False
 		While Not $closed And $elapsed < $waitSec * 1000
 			$closed = Not pbBattleIsDisplayed($app)
+			If Not $closed Then
+				ConsoleWrite("*")
+			EndIf
 			Sleep($interval)
 			$elapsed = TimerDiff($timer)
 		WEnd
+		ConsoleWrite(@CRLF)
 		pbStateSet($APP_IN_BATTLE, Not $closed)
 	EndIf
 EndFunc

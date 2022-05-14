@@ -1,6 +1,6 @@
 #include-once
-#include "Includes\Storage\GlobalStorage.au3"
-#include "Includes\Storage\AppState.au3"
+#include "..\Storage\GlobalStorage.au3"
+#include "..\Storage\AppState.au3"
 
 #cs ----------------------------------------------------------------------------
 

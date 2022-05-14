@@ -10,10 +10,8 @@ Func setBotSettingPath(Const $path)
 EndFunc
 
 ;~ Bot notification setting group
-Global Const $BOT_NOTIFICATION_ENABLE = "bot.notification.enable"
 Global Const $BOT_NOTIFICATION_TELEGRAM_CHAT_ID = "bot.notification.telegram.chatid"
 Global Const $BOT_NOTIFICATION_TELEGRAM_BOT_TOKEN = "bot.notification.telegram.bottoken"
-$PROBotSetting.Add($BOT_NOTIFICATION_ENABLE, 0)
 $PROBotSetting.Add($BOT_NOTIFICATION_TELEGRAM_CHAT_ID, "")
 $PROBotSetting.Add($BOT_NOTIFICATION_TELEGRAM_BOT_TOKEN, "")
 
