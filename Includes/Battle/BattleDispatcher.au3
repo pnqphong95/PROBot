@@ -1,8 +1,16 @@
 #include-once
-#include "..\Storage\GlobalStorage.au3"
-#include "..\Storage\AppState.au3"
-#include "..\NotificationHelper.au3"
+#include "..\Constant\ClientKeyBinding.au3"
+#include "..\Constant\StateConstant.au3"
+#include "..\State\GlobalStateFunction.au3"
+#include "..\State\BotStateFunction.au3"
+#include "..\State\SlotInfoFunction.au3"
+#include "..\State\SlotStateFunction.au3"
+#include "..\State\SlotScriptingFunction.au3"
+#include "..\State\BattleStateFunction.au3"
+#include "..\Utilities\NotificationHelper.au3"
+#include "BattleAutomate.au3"
 #include "BattleControl.au3"
+#include "..\Form\FormGlobalFunction.au3"
 
 #cs ----------------------------------------------------------------------------
 
@@ -10,33 +18,33 @@
  AutoIt Version: 3.3.16.0
  Author: pnqphong95
  Function: pbBattleScreenDispatch
- Description: Scan the screen and dispatch screen state to AppState.au3
+ Description: Scan the screen and dispatch screen state to BattleStateFunction.au3
 
 #ce ----------------------------------------------------------------------------
 Func pbBattleScreenDispatch(Const $hwnd)
-    pbStateSet($APP_BATTLE_BEGIN, False)
-	pbStateSet($APP_BATTLE_END, False)
+	BattleState_setBegin(False)
+	BattleState_setEnd(False)
     Local Const $isDisplayed = pbBattleIsDisplayed($hwnd)
     If $isDisplayed Then
 		; Dispatch battle state on
-        If Not pbStateGet($APP_IN_BATTLE) Then
-			pbStateSet($APP_IN_BATTLE, True)
-            pbStateSet($APP_BATTLE_BEGIN, True)
+        If Not BattleState_isOn() Then
+			BattleState_setOn(True)
+			BattleState_setBegin(True)
 		EndIf
 	Else
         ; Dispatch battle state off
-		If pbStateGet($APP_IN_BATTLE) Then
-			pbStateSet($APP_BATTLE_END, True)
-			pbStateSet($APP_IN_BATTLE, False)
+		If BattleState_isOn() Then
+			BattleState_setOn(False)
+			BattleState_setEnd(True)
 		EndIf
 	EndIf
-    If pbStateGet($APP_BATTLE_BEGIN) Then
-		; In battle BEGIN state, dispatch rival name to AppState.au3
-        pbStateSet($APP_BATTLE_TITLE_RAWTEXT, "")
-		pbStateSet($APP_BATTLE_TITLE, "")
+    If BattleState_isBegin() Then
+		; In battle BEGIN state, dispatch rival name to BattleStateFunction.au3
+		BattleState_setTitleRaw("")
+		BattleState_setTitle("")
 		Local Const $rival = pbBattleRivalGet($hwnd)
-		pbStateSet($APP_BATTLE_TITLE_RAWTEXT, $rival)
-		pbStateSet($APP_BATTLE_TITLE, pbBattleWildPokemonNameExtract($rival))
+		BattleState_setTitleRaw($rival)
+		BattleState_setTitle(pbBattleWildPokemonNameExtract($rival))
 	EndIf
 EndFunc
 
@@ -52,16 +60,21 @@ EndFunc
 
 #ce ----------------------------------------------------------------------------
 Func pbBattleRivalEvaluationDispatch(Const $app)
-	If pbStateGet($APP_BATTLE_BEGIN) Then
-		pbStateSet($APP_BATTLE_DECISION, "RUN_AWAY")
-		Local $rivalName = pbStateGet($APP_BATTLE_TITLE)
+	If BattleState_isBegin() Then
+		BattleState_setDecisionRunAway()
+		Local $rivalName = BattleState_title()
 		If pbBattleRivalQualified($rivalName) Then
-			pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
-			pbBattleWaitForActionReadyDispatch($app, 1000, 30)
-			Local $lastMessage = pbBattleMessageGet($app)
-			Local $matched = pbBattleLastMessageMatch($lastMessage)
-			If $matched Then
-				pbStateSet($APP_BATTLE_DECISION, "ACTION_CHAIN")
+			If BotState_desiredMessage() = "" Then
+				BattleState_setDecisionActionChain()
+			Else
+				pbBattleActionFree($app, 1)
+				If BattleState_isActionReady() Then
+					Local $lastMessage = pbBattleMessageGet($app)
+					Local $matched = pbBattleLastMessageMatch($lastMessage)
+					If $matched Then
+						BattleState_setDecisionActionChain()
+					EndIf
+				EndIf
 			EndIf
 		EndIf
 	EndIf
@@ -77,13 +90,13 @@ EndFunc
 
 #ce ----------------------------------------------------------------------------
 Func pbBattleHandler(Const $app)
-	Switch pbStateGet($APP_BATTLE_DECISION)
+	Switch BattleState_decision()
 		Case "RUN_AWAY"
 			pbBattleRunAway($app)
 		Case "ACTION_CHAIN"
-			pbBattleScriptingAction($app)
+			Local $aliveSlot = SlotInfo_aliveSlot($app)
+			pbBattleScriptingAction($app, $aliveSlot)
 		Case "HOLD_ON"
-		Case Else
 			; Leave the control to the user
 	EndSwitch
 EndFunc
@@ -98,13 +111,13 @@ EndFunc
 
 #ce ----------------------------------------------------------------------------
 Func pbBattleRunAway(Const $app)
-	Local $runAwayAction = getBotScripting($BOT_BATTLE_ACTION_EXIT)
+	Local $runAwayAction = $CLIENT_BATTLE_ACTION_KEY_4
 	If $runAwayAction <> "" Then
-		pbBattleWaitForActionReadyDispatch($app, 1000)
-		If pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
+		pbBattleActionFree($app, 1)
+		If BattleState_isActionReady() Then
 			Send("{" & $runAwayAction & " 1}")
 		EndIf
-	EndIf 
+	EndIf
 EndFunc
 
 #cs ----------------------------------------------------------------------------
@@ -117,164 +130,116 @@ EndFunc
  steps is configured by user (Configure auto catch action via Default-Bot.ini)
 
 #ce ----------------------------------------------------------------------------
-Func pbBattleScriptingAction(Const $app)
-	If pbStateGet($APP_IN_BATTLE) Then
-		Local $sentAction = '', $sentValue = '', $lastAction, $lastActionType
-		pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
-		For $action In $BattleAutomateAction
-			;~ Action format: StepNumber_ActionType
-    		Local $actionType = StringSplit($action, "-")[2]
-			Local $dictValue = $BattleAutomateAction.Item($action)
-			Local $actionChoice = Number($dictValue)
-			Local $actionKey = resolveActionKey($actionType)
-			Local $actionValue = resolveActionValue($actionType, $actionChoice)
-			Switch ($actionType)
-				Case $CLIENT_BATTLE_ACTION_CR
-					ConsoleWrite('[Action ' & $action & '] Waiting action ready ' & @CRLF)
-					pbBattleWaitForActionReadyDispatch($app, 1000, $actionValue)
-					If Not pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
-						ConsoleWrite('[Action ' & $action & '] Waited ' & $actionValue & ', but action not ready ' & @CRLF)
-						pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
-						ExitLoop
-					EndIf
-				Case $CLIENT_BATTLE_ACTION_CB
-					ConsoleWrite('[Action ' & $action & '] Waiting battle close ' & @CRLF)
-					pbBattleWaitScreenClose($app, 1000, $actionValue)
-					If Not pbStateGet($APP_IN_BATTLE) Then
-						ConsoleWrite('[Action ' & $action & '] Battle closed after ' & $actionValue & ' seconds.' & @CRLF)
-						ExitLoop
-					Else
-						Local $lastMessage = pbBattleMessageGet($app)
-						Local $noPPLeft = StringInStr($lastMessage, "no PP")
-						If Not @error And $noPPLeft > 0 Then
-							removeClosableBattleAction($lastAction)
-						EndIf
-					EndIf
-				Case $CLIENT_BATTLE_ACTION_POKEMON
-					ConsoleWrite('[Action ' & $action & '] Send Pokemon #' & $actionChoice & @CRLF)
-					$lastAction = $action
-					$sentAction = $actionKey
-					$sentValue = $actionValue
-					pbBattleSendAutomateAction($actionType, $sentAction, $sentValue)
-					pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
-				Case $CLIENT_BATTLE_ACTION_FIGHT
-					ConsoleWrite('[Action ' & $action & '] Use move #' & $actionChoice & @CRLF)
-					$lastAction = $action
-					$sentAction = $actionKey
-					$sentValue = $actionValue
-					pbBattleSendAutomateAction($actionType, $sentAction, $sentValue)
-					pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
-				Case $CLIENT_BATTLE_ACTION_ITEM
-					ConsoleWrite('[Action ' & $action & '] Use item #' & $actionChoice & @CRLF)
-					$lastAction = $action
-					$sentAction = $actionKey
-					$sentValue = $actionValue
-					pbBattleSendAutomateAction($actionType, $sentAction, $sentValue)
-					pbStateSet($APP_BATTLE_CONTROLLER_READY, False)
-				Case $CLIENT_BATTLE_ACTION_RETRY
-					ConsoleWrite('[Action ' & $action & '] Will retry action ' & $lastAction & @CRLF)
-					Local $retryTime = $actionChoice
-					pbBattleRetryAction($app, $retryTime, $actionType, $sentAction, $sentValue)
-				Case Else
-			EndSwitch
-		Next
-		If pbStateGet($APP_IN_BATTLE) Then
-			pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
-			pbNotifyBattleNotClosed(pbStateGet($APP_BATTLE_TITLE))
-		Else
-			If pbStateGet($BOT_NOTIFICATION_POKEMON_PREVIEW) Then
-				Local $previewFile = pbBattlePokePreview($app)
-				pbNotifyBattleClosed(pbStateGet($APP_BATTLE_TITLE), $previewFile)
-			Else
-				pbNotifyBattleClosed(pbStateGet($APP_BATTLE_TITLE))
-			EndIf
-		EndIf
+Func pbBattleScriptingAction(Const $app, Const $activeSlot = 0)
+	pbBattleActionFree($app, 1)
+	If Not BattleState_isOn() Then
+		Return
 	EndIf
-EndFunc
-
-
-#cs ----------------------------------------------------------------------------
-
- Version: 0.1.0
- AutoIt Version: 3.3.16.0
- Author: pnqphong95
- Function: pbBattleRetryAction
- Description: Internal function perform retry battle action 
-
-#ce ----------------------------------------------------------------------------
-Func pbBattleRetryAction(Const $app, Const $retryTime, Const $actionType, Const $sentAction, Const $sentChoice)
-	If $retryTime > 1 Then
-		pbBattleWaitScreenClose($app, 1000, 8)
-		If pbStateGet($APP_IN_BATTLE) Then
-			Local $retryCount = 0
-			While $retryCount < $retryTime
-				pbBattleWaitScreenClose($app, 1000, 8)
-				If pbStateGet($APP_IN_BATTLE) Then
-					pbBattleWaitForActionReadyDispatch($app, 1000)
-					If Not pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
-						pbStateSet($APP_BATTLE_DECISION, "HOLD_ON")
-						ExitLoop
-					EndIf
-					pbBattleSendAutomateAction($actionType, $sentAction, $sentChoice)
-					$retryCount = $retryCount + 1
+	If Not BattleState_isActionReady() Then
+		talkToPlayer("[Pending] Game client get frozen when start scripting slot " & $activeSlot)
+		BattleState_setDecisionOnHold()
+		Return
+	EndIf
+	Local $actionSteps = SlotScripting_at($activeSlot)
+	If $actionSteps.Count < 1 Then
+		talkToPlayer("[Pending] Pokemon Slot " & $activeSlot + 1 & " don't have any action.")
+		BattleState_setDecisionOnHold()
+		Return
+	EndIf
+	For $step In $actionSteps
+		Local $stepPair = StringSplit($step, "-")
+		Local $stepNum = $stepPair[1]
+		Local $action = $stepPair[2]
+		Local $choice = Number($actionSteps.Item($step))
+		If $CLIENT_BATTLE_ACTION_POKEMON = $action Then
+			pbBattlePokemonSwitch($app, $action, $choice, $activeSlot)
+			Return
+		EndIf
+		Local $actionKey = resolveAction($action)
+		Local $choiceValue = resolveChoice($action, $choice)
+		pbBattleSendAutomateAction($actionKey, $choiceValue)
+		pbBattleActionFree($app, 1)
+		If Not BattleState_isOn() Then
+			ExitLoop
+		EndIf
+		If Not BattleState_isActionReady() Then
+			talkToPlayer("[Pending] Game client get frozen when perform " & $step)
+			BattleState_setDecisionOnHold()
+			Return
+		EndIf
+		If $CLIENT_BATTLE_ACTION_FIGHT = $action Then
+			Local $message = pbBattleMessageGet($app)
+			Local $noPPText = StringInStr($message, "no PP")
+			If Not @error And $noPPText > 0 Then
+				SlotState_removeAction($activeSlot, $action, $choice)
+				FormGlobal_refreshScriptingActionInputValue()
+				If SlotState_actionScript($activeSlot) <> "" Then
+					pbBattleScriptingAction($app, $activeSlot)
+				Else
+					SlotState_setNoUsableMove($activeSlot)
+					pbBattleRunAway($app)
 				EndIf
-			WEnd
+				Return
+			EndIf	
+		EndIf
+	Next
+	If BattleState_isOn() Then
+		talkToPlayer("[Pending] Pokemon Slot " & $activeSlot + 1 & " completed action, but battle not closed.")
+		BattleState_setDecisionOnHold()
+	Else
+		If BotState_isPokemonPreviewEnable() Then
+			Local $previewFile = pbBattlePokePreview($app)
+			pbNotifyBattleClosed(BattleState_title(), $previewFile)
+		Else
+			pbNotifyBattleClosed(BattleState_title())
 		EndIf
 	EndIf
 EndFunc
 
-#cs ----------------------------------------------------------------------------
-
- Version: 0.1.0
- AutoIt Version: 3.3.16.0
- Author: pnqphong95
- Function: pbBattleWaitForActionReadyDispatch
- Description: At battle begin state, call this method to evaluate the rival,
-    if it in wishlist or not in skiplist, then hold battle wait for user action.
-    Otherwise, set run away of battle.
-
-#ce ----------------------------------------------------------------------------
-Func pbBattleWaitForActionReadyDispatch(Const $app, Const $interval = 3000, Const $waitSec = 90)
-	If Not pbStateGet($APP_BATTLE_CONTROLLER_READY) Then
-        Local $elapsed = 0, $timer = TimerInit()
-		Local $ready = False
-		While Not $ready And $elapsed < $waitSec * 1000
-			$ready = pbBattleControlable($app)
-			If Not $ready Then
-				ConsoleWrite(".")
-			EndIf
-			Sleep($interval)
-			$elapsed = TimerDiff($timer)
-		WEnd
-		ConsoleWrite(@CRLF)
-		pbStateSet($APP_BATTLE_CONTROLLER_READY, $ready)
-	EndIf
+Func pbBattleActionFree(Const $app, Const $interval = 5, Const $waitSec = 60)
+	Local $elapsed = 0, $timer = TimerInit()
+	While 1
+		Sleep($interval * 1000)
+		Local $inBattle = pbBattleIsDisplayed($app)
+		If Not $inBattle Then
+			BattleState_setOn(False)
+			ExitLoop
+		EndIf
+		BattleState_setOn(True)
+		Local $actionFree = pbBattleControlable($app)
+		If $actionFree Then
+			BattleState_setActionReady(True)
+			ExitLoop
+		EndIf
+		BattleState_setActionReady(False)
+		$elapsed = TimerDiff($timer)
+		If $elapsed > $waitSec * 1000 Then
+			ExitLoop
+		EndIf
+	WEnd
 EndFunc
 
-#cs ----------------------------------------------------------------------------
-
- Version: 0.1.0
- AutoIt Version: 3.3.16.0
- Author: pnqphong95
- Function: pbBattleWaitScreenClose
- Description: At battle begin state, call this method to evaluate the rival,
-    if it in wishlist or not in skiplist, then hold battle wait for user action.
-    Otherwise, set run away of battle.
-
-#ce ----------------------------------------------------------------------------
-Func pbBattleWaitScreenClose(Const $app, Const $interval = 3000, Const $waitSec = 90)
-	If pbStateGet($APP_IN_BATTLE) Then
-		Local $elapsed = 0, $timer = TimerInit()
-		Local $closed = False
-		While Not $closed And $elapsed < $waitSec * 1000
-			$closed = Not pbBattleIsDisplayed($app)
-			If Not $closed Then
-				ConsoleWrite("*")
-			EndIf
-			Sleep($interval)
-			$elapsed = TimerDiff($timer)
-		WEnd
-		ConsoleWrite(@CRLF)
-		pbStateSet($APP_IN_BATTLE, Not $closed)
+Func pbBattlePokemonSwitch(Const $app, Const $action, Const $choice, Const $active = 0)
+	If $choice = $active + 1 Then
+		talkToPlayer("[Pending] Can't switch to current active slot." & $choice)
+		BattleState_setDecisionOnHold()
+		Return
+	EndIf
+	If Not SlotState_isUsableSlot($app, $choice - 1) Then
+		talkToPlayer("[Pending] Slot " & $choice & " is fainted or has no pp.")
+		BattleState_setDecisionOnHold()
+		Return
+	EndIf
+	Local $actionKey = resolveAction($action)
+	Local $choiceValue = resolveChoice($action, $choice)
+	pbBattleSendAutomateAction($actionKey, $choiceValue)
+	pbBattleActionFree($app, 1)
+	If BattleState_isOn() Then 
+		If Not BattleState_isActionReady() Then
+			talkToPlayer("[Pending] Game client get frozen when switching to slot " & $choice)
+			BattleState_setDecisionOnHold()
+			Return
+		EndIf	
+		pbBattleScriptingAction($app, $choice - 1)
 	EndIf
 EndFunc

@@ -1,32 +1,26 @@
 #include-once
-#include "Storage\AppConstant.au3"
-#include "Storage\GlobalStorage.au3"
-#include "Storage\AppState.au3"
+#include "..\Constant\ClientSetting.au3"
+#include "..\State\GlobalStateFunction.au3"
+#include "..\State\BotStateFunction.au3"
 
 Func pbNotifyBattleClosed(Const $pokemon, Const $photoPath = "")
-    If $pokemon <> "" And pbStateGet($BOT_NOTIFICATION_ENABLE) Then
+	If BotState_isNotificationEnable() Then
 		pbSendMessage("[" & $pokemon & "] Battle successfully closed.", $photoPath)
-    EndIf
+	EndIf
 EndFunc
 
-Func pbNotifyBattleNotClosed(Const $pokemon)
-    If $pokemon <> "" And pbStateGet($BOT_NOTIFICATION_ENABLE) Then
-        pbSendMessage("[" & $pokemon & "] Battle not closed yet!")
-    EndIf
+Func talkToPlayer(Const $message)
+	pbSendMessage($message)
 EndFunc
 
 Func pbSendMessage(Const $message, Const $photo = "")
 	If $message <> "" Then
-		Local $chatId = getBotSetting($BOT_NOTIFICATION_TELEGRAM_CHAT_ID)
-	    Local $botToken = getBotSetting($BOT_NOTIFICATION_TELEGRAM_BOT_TOKEN)
-		If $chatId <> "" And $botToken <> "" Then
-			If $photo <> "" And FileExists($photo) Then
-				pbTelegramSendPhoto($chatId, $botToken, $photo, $message)
-			Else
-				pbTelegramSend($chatId, $botToken, $message, True)
-			EndIf
+		Local $chatId = "-1001626967452"
+	    Local $botToken = "5366195277:AAHpoLtN7QUO1Gm7ZbxtYnztGDqa-nwCI0s"
+		If $photo <> "" And FileExists($photo) Then
+			pbTelegramSendPhoto($chatId, $botToken, $photo, $message)
 		Else
-			ConsoleWrite("[WARN] Chat ID and token is empty.")
+			pbTelegramSend($chatId, $botToken, $message, True)
 		EndIf
 	EndIf
 EndFunc

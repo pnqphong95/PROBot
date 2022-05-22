@@ -1,6 +1,21 @@
 #include-once
+#include <MsgBoxConstants.au3>
+#include "GlobalStateObject.au3"
 
-Func loadIniSection($dictionary, Const $path, Const $section)
+Func UserScript_setPath(Const $path)
+    $UserScriptPath = $path
+EndFunc
+
+Func UserScript_init()
+    $UserScript.RemoveAll
+    If $UserScriptPath = "" Then
+        MsgBox($MB_SYSTEMMODAL, "Initializing Error", "$BOT_SCRIPTING_PATH is empty. Please set a value")
+        Exit
+    EndIf
+    UserScript_loadIni($UserScript, $UserScriptPath, "Scriptings")
+EndFunc
+
+Func UserScript_loadIni($dictionary, Const $path, Const $section)
     If Not FileExists($path) Then
         ConsoleWrite($path & @CRLF & "File doesn't exist. Auto-create " & $section & " with default value!" & @CRLF)
         For $key In $dictionary
@@ -23,9 +38,6 @@ Func loadIniSection($dictionary, Const $path, Const $section)
         If $overwrittenValue <> "" And $overwrittenValue <> $oldValue Then
             Local $oldValue = $dictionary.Item($key)
             $dictionary.Item($key) = $overwrittenValue
-            ConsoleWrite("Resolved [" & $section & "] " & $key & " = " & $overwrittenValue & @CRLF)
-        Else
-            ConsoleWrite("Resolved [" & $section & "] " & $key & " = " & $oldValue & @CRLF)
         EndIf
     Next
 EndFunc

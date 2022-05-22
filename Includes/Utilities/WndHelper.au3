@@ -1,5 +1,4 @@
 #include-once
-#include <MsgBoxConstants.au3>
 
 Func activateWindow(Const $hnwd)
 	If Not WinActive($hnwd) Then

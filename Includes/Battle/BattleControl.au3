@@ -9,9 +9,10 @@
 #include <File.au3>
 #include <ScreenCapture.au3>
 #include <StringConstants.au3>
-#include "..\WndHelper.au3"
+#include "..\Constant\ClientSetting.au3"
 #include "..\Libs\Tesseract.au3"
-#include "..\Storage\GlobalStorage.au3"
+#include "..\State\GlobalStateFunction.au3"
+#include "..\Utilities\WndHelper.au3"
 
 #cs ----------------------------------------------------------------------------
 
@@ -29,11 +30,11 @@ Func pbBattleIsDisplayed($hnwd)
 		; 2 =  relative coords to the client area of the defined window.
 		activateWindow($hnwd)
 		Opt("PixelCoordMode", 2)
-		Local $color = getBotSetting($CLIENT_BATTLE_TOPBAR_COLOR)
-        Local $xCoor = getBotSetting($CLIENT_BATTLE_TOPBAR_X)
-        Local $yCoor = getBotSetting($CLIENT_BATTLE_TOPBAR_Y)
-        Local $width = getBotSetting($CLIENT_BATTLE_TOPBAR_WIDTH)
-        Local $height = getBotSetting($CLIENT_BATTLE_TOPBAR_HEIGHT)
+		Local $color = $CLIENT_BATTLE_TOPBAR_COLOR
+        Local $xCoor = $CLIENT_BATTLE_TOPBAR_X
+        Local $yCoor = $CLIENT_BATTLE_TOPBAR_Y
+        Local $width = $CLIENT_BATTLE_TOPBAR_WIDTH
+        Local $height = $CLIENT_BATTLE_TOPBAR_HEIGHT
         Local $resultCoor = PixelSearch($xCoor, $yCoor, $xCoor + $width, $yCoor + $height, $color, 1, 1, $hnwd)
 		Return Not @error
 	EndIf
@@ -53,10 +54,10 @@ EndFunc
 Func pbBattleRivalGet($hnwd)
 	If IsHWnd($hnwd) Then
 		_TesseractTempPathSet(@TempDir & "\")
-		Local $xCoor = getBotSetting($CLIENT_BATTLE_TITLE_X)
-        Local $yCoor = getBotSetting($CLIENT_BATTLE_TITLE_Y)
-        Local $width = getBotSetting($CLIENT_BATTLE_TITLE_WIDTH)
-        Local $height = getBotSetting($CLIENT_BATTLE_TITLE_HEIGHT)
+		Local $xCoor = $CLIENT_BATTLE_TITLE_X
+        Local $yCoor = $CLIENT_BATTLE_TITLE_Y
+        Local $width = $CLIENT_BATTLE_TITLE_WIDTH
+        Local $height = $CLIENT_BATTLE_TITLE_HEIGHT
 		Return _TesseractWinCapture(WinGetTitle($hnwd), "", 0, "", 1, 2, $xCoor, $yCoor, $xCoor + $width, $yCoor + $height, 0)
 	EndIf
 	Return ""
@@ -123,11 +124,11 @@ Func pbBattleControlable($hnwd)
 		; 2 =  relative coords to the client area of the defined window.
 		activateWindow($hnwd)
 		Opt("PixelCoordMode", 2)
-		Local $color = getBotSetting($CLIENT_BATTLE_ACTION_COLOR)
-        Local $xCoor = getBotSetting($CLIENT_BATTLE_ACTION_X)
-        Local $yCoor = getBotSetting($CLIENT_BATTLE_ACTION_Y)
-        Local $width = getBotSetting($CLIENT_BATTLE_ACTION_WIDTH)
-        Local $height = getBotSetting($CLIENT_BATTLE_ACTION_HEIGHT)
+		Local $color = $CLIENT_BATTLE_ACTION_COLOR
+        Local $xCoor = $CLIENT_BATTLE_ACTION_X
+        Local $yCoor = $CLIENT_BATTLE_ACTION_Y
+        Local $width = $CLIENT_BATTLE_ACTION_WIDTH
+        Local $height = $CLIENT_BATTLE_ACTION_HEIGHT
         Local $resultCoor = PixelSearch($xCoor, $yCoor, $xCoor + $width, $yCoor + $height, $color, 3, 1, $hnwd)
 		Return Not @error
 	EndIf
@@ -147,8 +148,8 @@ Func pbBattleRivalQualified(Const $rivalName)
 	If $rivalName = "" Then
 		Return True
 	EndIf
-	Local $wishlist = getBotScripting($BOT_BATTLE_DESIRED_OPPONENT)
-	Local $notIgnoreList = getBotScripting($BOT_BATTLE_IGNORED_OPPONENT)
+	Local $wishlist = BotState_desiredOpponent()
+	Local $notIgnoreList = BotState_ignoredOpponent()
 	If $wishlist = "" And $notIgnoreList = "" Then
 		Return True
 	EndIf
@@ -180,7 +181,7 @@ Func pbBattleLastMessageMatch(Const $lastMsg)
 	If $lastMsg = "" Then
 		Return True
 	EndIf
-	Local $wishLastMsg = getBotScripting($BOT_BATTLE_DESIRED_MESSAGE)
+	Local $wishLastMsg = BotState_desiredMessage()
 	If $wishLastMsg = "" Then
 		Return True
 	EndIf
@@ -221,7 +222,7 @@ EndFunc
  Description: Send automate action to game client
 
 #ce ----------------------------------------------------------------------------
-Func pbBattleSendAutomateAction(Const $actionType, $action = '', $choice = '')
+Func pbBattleSendAutomateAction($action = '', $choice = '')
 	If $action <> "" And $choice <> "" Then
 		Send("{" & $action &" 1}")
 		Sleep(Random(500, 1000, 1))	
