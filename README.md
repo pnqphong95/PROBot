@@ -1,3 +1,3 @@
 # probot
-AutoIT script for hunting Pokémon in MMORPG game. 
+AutoIT script for hunting Pokémon in MMORPG game.  
 ![PROBot Main screen](Extras/main.png)
