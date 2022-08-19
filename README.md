@@ -11,11 +11,11 @@ Depend on how you enjoy the game. But for me, I'm interested in pokemon battle o
 
 ### Run back-and-forth automatically.
 AutoIt provide all needed functions to interact with Keyboard. The bot will press and hold key `left`, `right`, `up`, `down` with a random duration. This function help to reduce a lot of time just staying in front of machine, pressing the key.
-https://github.com/pnqphong95/probot/blob/b3cfcd2a08d860aacd1d3c3c7ddd685dddf20bf6/Includes/Entrypoint.au3#L93-L120
+https://github.com/pnqphong95/Pokemon-MMORPG-Bot/blob/b7c256930f8c52df6bf0e2edad93ca61b112d229/Includes/Entrypoint.au3#L93-L120
 
 ### Recognize desired pokemon and perform proper action.
 There are few options to tweak a Unity game in client-server model but since the game client and communication packet client-server are encrypted. So making bot able to see/recognize the content on screen is only possible solution. In this case, I used Tesseract OCR.
-https://github.com/pnqphong95/probot/blob/b3cfcd2a08d860aacd1d3c3c7ddd685dddf20bf6/Includes/Battle/BattleControl.au3#L44-L64
+https://github.com/pnqphong95/Pokemon-MMORPG-Bot/blob/b7c256930f8c52df6bf0e2edad93ca61b112d229/Includes/Battle/BattleControl.au3#L44-L64
 
 This will capture a pre-defined area on the screen and extract the text using OCR method.  
 The text is a pokemon name, then evaluate if it's desired one. If yes, we fill the the key to perform needed action.  
