@@ -1,6 +1,5 @@
 # Pokémon MMORPG Bot (_Deprecated_)
-Script for effortlessly hunting Pokémon in MMORPG game.  
-Automate action by AutoIT and extract game data with optical character recognition (Tesseract)
+Script for effortlessly hunting Pokémon in MMORPG game. Automate action by AutoIT and extract game data with optical character recognition (Tesseract)
 ## Game Plays
 The game is about Ash adventures through multiple regions, from Kanto, Johto to Hoenn and Sinnoh. During the journey, there will be spots on the screen where the main character run back-and-forth to randomly meet a pokemon. That process is not easy, especially for extremely rare or shiny pokemon, the chance to meet them about 1/8192 so we really need __much effort to run back-and-forth several rounds__.  But never give up, we won't be able to imagine the feeling of catching a special pokemon.  
   
