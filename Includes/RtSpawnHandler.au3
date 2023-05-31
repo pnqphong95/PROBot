@@ -1,6 +1,6 @@
 #include-once
-#include "Storage\SessionFunc.au3"
-#include "Functions\GameStateFunc.au3"
+#include "Storage\BotSetting.au3"
+#include "Storage\SessionVariable.au3"
 
 Func ProBot_ReleaseSpawnKey()
 	Local $spawnDirection = $SessionVariables.Item($RT_SPAWN_LAST_DIRECTION)
