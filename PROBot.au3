@@ -1,7 +1,7 @@
 #AutoIt3Wrapper_UseX64=Y
 #AutoIt3Wrapper_Change2CUI=Y
 #AutoIt3Wrapper_OutFile=Build\Probot.exe
-#AutoIt3Wrapper_Icon=Metadata\command-line_115191.ico
+#AutoIt3Wrapper_Icon=Metadata\Probot.ico
 
 #include <Misc.au3>
 #include <MsgBoxConstants.au3>
@@ -21,15 +21,7 @@ EndIf
 
 ProBot_LoadExternalSettings(@WorkingDir & "\Probot.ini")
 ProBot_ParseCmdLineParams($CmdLine)
-
-If Not $CmdLineParams.Exists("vf") Then
-	ConsoleWriteError("[Bot] Aborted, param -vf must be present!" & @CRLF)
-	Exit
-EndIf
-If Not FileExists($CmdLineParams.Item("vf")) Then
-	ConsoleWriteError("[Bot] Aborted, given variable file " & $CmdLineParams.Item("vf") & " not exist!" & @CRLF)
-	Exit
-EndIf
+ProBot_ValidateCmdLineParams()
 ProBot_LoadSessionVariables($CmdLineParams.Item("vf"))
 
 While 1
@@ -40,7 +32,7 @@ While 1
 	ElseIf Not ProBot_IsMouseHoverGameClient("PROClient") Then
         ProBot_ReleaseSpawnKey()
         ConsoleWrite("[Bot] Pending, place cursor into PROClient.exe to start.." & @CRLF)
-        Sleep(8000)
+        Sleep(5000)
 	Else
 		ProBot_CaptureGameState($hwnd)
 		ProBot_ReleaseSpawnKey()
