@@ -21,10 +21,20 @@ Func ProBot_ParseCmdLineParams(Const $CmdLine)
 			EndIf
 		Next
 	EndIf
-	Local $log = "[CommandLine Params] " & @CRLF
+	Local $log = "[CommandLine Params] "
 	For $key In $CmdLineParams
-		$log = $log & " " & $key & " = " & $CmdLineParams.Item($key) & @CRLF
+		$log = $log & $key & "=" & $CmdLineParams.Item($key) & "; "
 	Next
 	ConsoleWrite($log & @CRLF)
 EndFunc
 
+Func ProBot_ValidateCmdLineParams()
+	If Not $CmdLineParams.Exists("vf") Then
+		ConsoleWriteError("[Bot] Aborted, param -vf must be present!" & @CRLF)
+		Exit
+	EndIf
+	If Not FileExists($CmdLineParams.Item("vf")) Then
+		ConsoleWriteError("[Bot] Aborted, given variable file " & $CmdLineParams.Item("vf") & " not exist!" & @CRLF)
+		Exit
+	EndIf
+EndFunc

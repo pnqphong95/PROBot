@@ -27,12 +27,8 @@ Func ProBot_CaptureGameState(Const $hwnd)
 		Local Const $opponent = ProBot_CaptureOpponent($hwnd)
 		$SessionVariables.Item($RT_RAW_TEXT) = $opponent
 		$SessionVariables.Item($RT_RECOGNISED_OPPONENT) = ProBot_OpponentExtractText($opponent)
-		$SessionVariables.Item($RT_BATTLE_COUNTER) = Number($SessionVariables.Item($RT_BATTLE_COUNTER)) + 1
-		If $BattleHolder.Exists($opponent) Then
-			$BattleHolder.Item($opponent) = Number($BattleHolder.Item($opponent)) + 1 
-		Else
-			$BattleHolder.Item($opponent) = 1
-		EndIf
+		ProBot_RecordOpponentLogEntry($opponent)
+		ProBot_ReportOpponentLogEntries()
 	EndIf
 EndFunc
 
@@ -47,15 +43,6 @@ Func ProBot_EvaluateGameState(Const $hwnd)
 		EndIf
 		If $SessionVariables.Item($RT_ACTION) = $RT_ACTION_RUNAWAY Then
 			ConsoleWrite("run away!" & @CRLF)
-		EndIf
-		If $SessionVariables.Item($REPORT_ENABLE) And $SessionVariables.Item($RT_BATTLE_COUNTER) > Random(20, 40, 1) Then
-			Local $message = "Found more " & $SessionVariables.Item($RT_BATTLE_COUNTER) & " wild pokemons:" & @CRLF & @CRLF
-			For $key In $BattleHolder
-				$message = $message & " " & $BattleHolder.Item($key) & " x " & $key & @CRLF
-			Next
-			$SessionVariables.Item($RT_BATTLE_COUNTER) = 0
-			$BattleHolder.RemoveAll
-			ProBot_Notify($Settings.Item($REPORT_BOT_URL), $Settings.Item($REPORT_CHAT_ID), $message)
 		EndIf
 	EndIf
 EndFunc
@@ -91,7 +78,6 @@ Func ProBot_IsBattleDialogVisible($hwnd)
 	Return $visible
 EndFunc
 
-
 Func ProBot_IsBattleActionReady($hwnd)
 	Local $left = $Settings.Item($ACTION_INDICATOR_LEFT)
 	Local $top = $Settings.Item($ACTION_INDICATOR_TOP)
@@ -115,4 +101,26 @@ Func ProBot_CaptureLatestLog($hwnd)
 	Local $right = $Settings.Item($LOG_INDICATOR_RIGHT)
 	Local $bottom = $Settings.Item($LOG_INDICATOR_BOTTOM)
 	Return ProBot_ExtractText($hwnd, $left, $top, $right, $bottom)
+EndFunc
+
+Func ProBot_RecordOpponentLogEntry(Const $opponentRawText)
+	$SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) = Number($SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER)) + 1
+	If $OpponentLogEntries.Exists($opponentRawText) Then
+		$OpponentLogEntries.Item($opponentRawText) = Number($OpponentLogEntries.Item($opponentRawText)) + 1 
+	Else
+		$OpponentLogEntries.Item($opponentRawText) = 1
+	EndIf
+EndFunc
+
+Func ProBot_ReportOpponentLogEntries()
+	If $SessionVariables.Item($REPORT_ENABLE) = 1 And $SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) > Random(5, 15, 1) Then
+		Local $message = "[Encountered " & $SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) & " wild pokemons]" & @CRLF
+		For $opponentName In $OpponentLogEntries
+			Local $replacedStr = StringReplace($OpponentLogEntries.Item($opponentName) & " x " & $opponentName, @LF, "")
+			$message = $message & $replacedStr & @CRLF
+		Next
+		ProBot_Notify($Settings.Item($REPORT_BOT_URL), $Settings.Item($REPORT_CHAT_ID), $message)
+		$SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) = 0
+		$OpponentLogEntries.RemoveAll
+	EndIf
 EndFunc

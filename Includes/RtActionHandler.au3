@@ -42,7 +42,7 @@ Func ProBot_HandleAuto(Const $hwnd)
 		ConsoleWrite(".completed!" & @CRLF)
 		If Not $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
 			$SessionVariables.Item($RT_ACTION) = ""
-			If $SessionVariables.Item($REPORT_ENABLE) Then
+			If $SessionVariables.Item($REPORT_ENABLE) = 1 Then
 				Local $message = "Gotcha! New caught " & $SessionVariables.Item($RT_RECOGNISED_OPPONENT)
 				ProBot_Notify($Settings.Item($REPORT_BOT_URL), $Settings.Item($REPORT_CHAT_ID), $message)
 			EndIf

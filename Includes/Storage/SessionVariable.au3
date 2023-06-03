@@ -17,13 +17,13 @@ Global Const $RT_RECOGNISED_OPPONENT = "bot.session.runtime.battle.recogised-opp
 Global Const $RT_IS_ACTIONABLE = "bot.session.runtime.battle.actionable"
 Global Const $RT_ACTION = "bot.session.runtime.battle.action"
 Global Const $RT_STATE = "bot.session.runtime.state"
-Global Const $RT_BATTLE_COUNTER = "bot.session.runtime.battle-counter"
+Global Const $RT_OPPONENT_LOG_ENTRIES_COUNTER = "bot.session.runtime.opponent-log-entries-counter"
 Global $SessionVariables = ObjCreate("Scripting.Dictionary")
 Global $RuntimeActions = ObjCreate("Scripting.Dictionary")
-Global $BattleHolder = ObjCreate("Scripting.Dictionary")
+Global $OpponentLogEntries = ObjCreate("Scripting.Dictionary")
 
 ; Static config from config file
-$SessionVariables.Item($REPORT_ENABLE) = True
+$SessionVariables.Item($REPORT_ENABLE) = 1
 $SessionVariables.Item($ACCEPTED_OPPONENT) = ""
 $SessionVariables.Item($REJECTED_OPPONENT) = ""
 $SessionVariables.Item($ACTIONS_ON_ACCEPT) = ""
@@ -41,7 +41,7 @@ $SessionVariables.Item($RT_RAW_LOG) = ""
 $SessionVariables.Item($RT_RECOGNISED_OPPONENT) = ""
 $SessionVariables.Item($RT_IS_ACTIONABLE) = False
 $SessionVariables.Item($RT_ACTION) = ""
-$SessionVariables.Item($RT_BATTLE_COUNTER) = 0
+$SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) = 0
 
 Func ProBot_LoadSessionVariables(Const $file)
 	If Not FileExists($file) Then
@@ -71,13 +71,13 @@ Func ProBot_LoadActionOnAccept()
 	If $SessionVariables.Item($ACTIONS_ON_ACCEPT) = "" Then
 		Return
 	EndIf
-	Local $Actions = StringSplit($SessionVariables.Item($ACTIONS_ON_ACCEPT), "|")
+	Local $Actions = StringSplit($SessionVariables.Item($ACTIONS_ON_ACCEPT), ".")
 	If $Actions[0] < 1 Then
 		Return
 	EndIf
 	$RuntimeActions.RemoveAll
 	For $i = 1 To $Actions[0]
-		Local $Pair = StringSplit($Actions[$i], ".")
+		Local $Pair = StringSplit($Actions[$i], "")
 		If $Pair[0] <> 2 Then
 			ConsoleWrite("[Variables] Unable to parse " & $Actions[$i] & ", Only allow 1 dot in action." & @CRLF)
 			Exit
