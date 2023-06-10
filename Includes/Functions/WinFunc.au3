@@ -1,5 +1,7 @@
 #include-once
 #include "..\Libs\Tesseract.au3"
+#include <File.au3>
+#include <ScreenCapture.au3>
 
 Func ProBot_ActivateWindow(Const $hwnd)
 	If Not WinActive($hwnd) Then
@@ -28,6 +30,7 @@ EndFunc
 Func ProBot_IsPixelColorDisplayed($hwnd, Const $left, Const $top, Const $right, Const $bottom, Const $color, Const $variant = 1)
 	If IsHWnd($hwnd) Then
 		Opt("PixelCoordMode", 2)
+		Opt("MouseClickDownDelay", 1000)
 		ProBot_ActivateWindow($hwnd)
         PixelSearch($left, $top, $right, $bottom, $color, $variant, 1, $hwnd)
 		Return Not @error
@@ -41,4 +44,16 @@ Func ProBot_ExtractText($hwnd, Const $left, Const $top, Const $right, Const $bot
 		Return _TesseractWinCapture(WinGetTitle($hwnd), "", 0, "", 1, $scale, $left, $top, $right, $bottom, 0)
 	EndIf
 	Return ""
+EndFunc
+
+Func ProBot_MakeScreenshotArea($hwnd, Const $left, Const $top, Const $right, Const $bottom)
+	Local $tempScreenshot = _TempFile(@TempDir & "\", "temp_screenshot_", ".jpg", Default)
+	_ScreenCapture_CaptureWnd($tempScreenshot, $hwnd, $left, $top, $right, $bottom)
+	Return $tempScreenshot
+EndFunc
+
+Func ProBot_MakeScreenshot($hwnd)
+	Local $tempScreenshot = _TempFile(@TempDir & "\", "temp_screenshot_", ".jpg", Default)
+	_ScreenCapture_CaptureWnd($tempScreenshot, $hwnd)
+	Return $tempScreenshot
 EndFunc

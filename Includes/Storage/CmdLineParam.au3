@@ -1,4 +1,5 @@
 #include-once
+#include "..\Functions\Logger.au3"
 
 Global $CmdLineParams = ObjCreate("Scripting.Dictionary")
 
@@ -21,20 +22,22 @@ Func ProBot_ParseCmdLineParams(Const $CmdLine)
 			EndIf
 		Next
 	EndIf
+	#cs
 	Local $log = "[CommandLine Params] "
 	For $key In $CmdLineParams
 		$log = $log & $key & "=" & $CmdLineParams.Item($key) & "; "
 	Next
-	ConsoleWrite($log & @CRLF)
+	ProBot_Log($log) 
+	#ce
 EndFunc
 
 Func ProBot_ValidateCmdLineParams()
 	If Not $CmdLineParams.Exists("vf") Then
-		ConsoleWriteError("[Bot] Aborted, param -vf must be present!" & @CRLF)
+		ProBot_Log("Aborted, param -vf must be present!")
 		Exit
 	EndIf
 	If Not FileExists($CmdLineParams.Item("vf")) Then
-		ConsoleWriteError("[Bot] Aborted, given variable file " & $CmdLineParams.Item("vf") & " not exist!" & @CRLF)
+		ProBot_Log("Aborted, given variable file " & $CmdLineParams.Item("vf") & " not exist!")
 		Exit
 	EndIf
 EndFunc

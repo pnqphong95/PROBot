@@ -1,9 +1,12 @@
 #include-once
+#include "..\Functions\Logger.au3"
 
+Global Const $SESSION_MODE = "bot.session.mode"
 Global Const $REPORT_ENABLE = "bot.session.report.enable"
-Global Const $ACCEPTED_OPPONENT = "bot.session.battle.accepted-opponent"
-Global Const $REJECTED_OPPONENT = "bot.session.battle.rejected-opponent"
-Global Const $ACTIONS_ON_ACCEPT = "bot.session.battle.actions-on-accept"
+Global Const $AUTO_CAUGHT_LIST = "bot.session.battle.auto-caught-list"
+Global Const $AUTO_FIGHT_LIST = "bot.session.battle.auto-fight-list"
+Global Const $SYNC_POKEMON_SLOT_NUMBER = "bot.session.battle.sync-slot-number"
+Global Const $FALSE_SWIPE_POKEMON_SLOT_NUMBER = "bot.session.battle.fs-slot-number"
 Global Const $SPAWN_INITIAL_DIRECTION = "bot.session.spawn.direction"
 Global Const $SPAWN_MIN = "bot.session.spawn.min"
 Global Const $SPAWN_MAX = "bot.session.spawn.max"
@@ -18,18 +21,21 @@ Global Const $RT_IS_ACTIONABLE = "bot.session.runtime.battle.actionable"
 Global Const $RT_ACTION = "bot.session.runtime.battle.action"
 Global Const $RT_STATE = "bot.session.runtime.state"
 Global Const $RT_OPPONENT_LOG_ENTRIES_COUNTER = "bot.session.runtime.opponent-log-entries-counter"
+Global Const $RT_OPPONENT_LOG_ENTRIES_THRESHOLD = "bot.session.runtime.opponent-log-entries-threshold"
 Global $SessionVariables = ObjCreate("Scripting.Dictionary")
-Global $RuntimeActions = ObjCreate("Scripting.Dictionary")
 Global $OpponentLogEntries = ObjCreate("Scripting.Dictionary")
 
 ; Static config from config file
+$SessionVariables.Item($SESSION_MODE) = ""
 $SessionVariables.Item($REPORT_ENABLE) = 1
-$SessionVariables.Item($ACCEPTED_OPPONENT) = ""
-$SessionVariables.Item($REJECTED_OPPONENT) = ""
-$SessionVariables.Item($ACTIONS_ON_ACCEPT) = ""
+$SessionVariables.Item($AUTO_CAUGHT_LIST) = ""
+$SessionVariables.Item($AUTO_FIGHT_LIST) = ""
+$SessionVariables.Item($SYNC_POKEMON_SLOT_NUMBER) = 1
+$SessionVariables.Item($FALSE_SWIPE_POKEMON_SLOT_NUMBER) = 2
 $SessionVariables.Item($SPAWN_INITIAL_DIRECTION) = "Left"
 $SessionVariables.Item($SPAWN_MIN) = 600
 $SessionVariables.Item($SPAWN_MAX) = 1000
+$SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_THRESHOLD) = 30
 
 ; Runtime variables
 $SessionVariables.Item($RT_SPAWN_LAST_DIRECTION) = ""
@@ -45,12 +51,12 @@ $SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) = 0
 
 Func ProBot_LoadSessionVariables(Const $file)
 	If Not FileExists($file) Then
-		ConsoleWrite("[Variables] file not exist. File dir = " & $file & @CRLF)
+		ProBot_Log("File not exist. File dir = " & $file)
 		Return
 	EndIf
 	Local $sessionVars = IniReadSection($file, "SessionVariables")
 	If @error Or $sessionVars[0][0] < 1 Then
-		ConsoleWrite("[Variables] file is empty. File dir = " & $file & @CRLF)
+		ProBot_Log("File is empty. File dir = " & $file)
 		Return
 	EndIf
 	For $i = 1 To $sessionVars[0][0]
@@ -58,38 +64,10 @@ Func ProBot_LoadSessionVariables(Const $file)
 		Local $newValue = $sessionVars[$i][1]
 		Local $oldValue = $SessionVariables.Item($key)
 		$SessionVariables.Item($key) = $newValue
-		If $oldValue <> $newValue Then
-			ConsoleWrite("[Variables] " & $key & " = " & $oldValue & "  ->  " & $newValue & @CRLF)
-		Else
-			ConsoleWrite("[Variables] " & $key & " = " & $newValue & @CRLF)
-		EndIf
-	Next
-	ProBot_LoadActionOnAccept()
-EndFunc
-
-Func ProBot_LoadActionOnAccept()
-	If $SessionVariables.Item($ACTIONS_ON_ACCEPT) = "" Then
-		Return
-	EndIf
-	Local $Actions = StringSplit($SessionVariables.Item($ACTIONS_ON_ACCEPT), ".")
-	If $Actions[0] < 1 Then
-		Return
-	EndIf
-	$RuntimeActions.RemoveAll
-	For $i = 1 To $Actions[0]
-		Local $Pair = StringSplit($Actions[$i], "")
-		If $Pair[0] <> 2 Then
-			ConsoleWrite("[Variables] Unable to parse " & $Actions[$i] & ", Only allow 1 dot in action." & @CRLF)
-			Exit
-		EndIf
-		If StringLen($Pair[1]) <> 1 Or Not StringInStr("PpFfIi", $Pair[1]) Then
-			ConsoleWrite("[Variables] Unable to parse " & $Actions[$i] & ", Only allow pokemon (p), item(i), fight(f) case-insensitive." & @CRLF)
-			Exit
-		EndIf
-		If Number($Pair[2]) < 1 Or Number($Pair[2]) > 4 Then
-			ConsoleWrite("[Variables] Unable to parse " & $Actions[$i] & ", Only allow action value is number [1-4]." & @CRLF)
-			Exit
-		EndIf
-		$RuntimeActions.Item($i & "-" & $Pair[1]) = $Pair[2]
+		;~ If $oldValue <> $newValue Then
+		;~ 	ProBot_Log($key & " = " & $oldValue & "  ->  " & $newValue)
+		;~ Else
+		;~ 	ProBot_Log($key & " = " & $newValue)
+		;~ EndIf
 	Next
 EndFunc

@@ -9,29 +9,33 @@
 #include "Includes\Storage\SessionVariable.au3"
 #include "Includes\Storage\CmdLineParam.au3"
 #include "Includes\Functions\WinFunc.au3"
+#include "Includes\Functions\Logger.au3"
 #include "Includes\RtSpawnHandler.au3"
 #include "Includes\RtBattleHandler.au3"
 #include "Includes\RtActionHandler.au3"
 
 ; Exit when another bot instance is running
 If _Singleton(@ScriptName, 1) = 0 Then
-    ConsoleWriteError("[Bot] Aborted, close other instances and retry!" & @CRLF)
+    ProBot_Log("Aborted, close other instances and retry!")
 	Exit
 EndIf
 
 ProBot_LoadExternalSettings(@WorkingDir & "\Probot.ini")
+ProBot_LoadPokemonTypeData(@WorkingDir & "\GameData\pokemon_types.csv")
+ProBot_LoadPokemonTypeChartData(@WorkingDir & "\GameData\type_chart.csv")
+ProBot_LoadPokemonMoves(@WorkingDir & "\GameData\moves.csv")
 ProBot_ParseCmdLineParams($CmdLine)
 ProBot_ValidateCmdLineParams()
 ProBot_LoadSessionVariables($CmdLineParams.Item("vf"))
 
 While 1
-    Local $hwnd = ProBot_ClientWindow("PROClient")
+    Local $hwnd = ProBot_ClientWindow("PROClient", False)
 	If Not $hwnd Or $hwnd = '' Then
-		ConsoleWrite("[Bot] Pending, open PROClient.exe to start.." & @CRLF)
-        Sleep(15000)
+		ProBot_Log("PENDING, waiting for PROClient get opened.")
+        Sleep(10000)
 	ElseIf Not ProBot_IsMouseHoverGameClient("PROClient") Then
         ProBot_ReleaseSpawnKey()
-        ConsoleWrite("[Bot] Pending, place cursor into PROClient.exe to start.." & @CRLF)
+        ProBot_Log("PENDING, waiting for cursor place inside PROClient.")
         Sleep(5000)
 	Else
 		ProBot_CaptureGameState($hwnd)
