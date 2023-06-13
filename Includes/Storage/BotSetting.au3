@@ -39,9 +39,13 @@ Global Const $ACTION_KEY_1 = "bot.battle.action.keybinding1"
 Global Const $ACTION_KEY_2 = "bot.battle.action.keybinding2"
 Global Const $ACTION_KEY_3 = "bot.battle.action.keybinding3"
 Global Const $ACTION_KEY_4 = "bot.battle.action.keybinding4"
+Global Const $ACTION_KEY_5 = "bot.battle.action.keybinding5"
+Global Const $ACTION_KEY_6 = "bot.battle.action.keybinding6"
 Global Const $REPORT_BOT_URL = "bot.report.telegram-bot-url"
 Global Const $REPORT_CHAT_ID = "bot.report.telegram-chat-id"
 Global $Settings = ObjCreate("Scripting.Dictionary")
+
+;Global pokemon data from CSV
 Global $DataPokemonTypes
 Global $DataTypeChart
 Global $DataPokemonMoves

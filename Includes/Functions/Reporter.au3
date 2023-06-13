@@ -3,10 +3,10 @@
 #include "..\Storage\BotSetting.au3"
 #include "..\Storage\SessionVariable.au3"
 
-Func ProBot_Notify(Const $TextMessage = "", Const $Photo = "")
+Func ProBot_Notify(Const $TextMessage = "", Const $bForce = False, Const $Photo = "")
 	Local $BotUrl = $Settings.Item($REPORT_BOT_URL)
 	Local $ChatId = $Settings.Item($REPORT_CHAT_ID)
-	If $SessionVariables.Item($REPORT_ENABLE) <> 1 Then
+	If Not $bForce And $SessionVariables.Item($REPORT_ENABLE) <> 1 Then
 		ProBot_Log("Skip message as feature disabled.")
 		Return
 	EndIf

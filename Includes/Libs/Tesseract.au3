@@ -985,3 +985,68 @@ Func CaptureToTIFF($win_title = "", $win_text = "", $ctrl_id = "", $sOutImage = 
     _WinAPI_DeleteObject($hBMP)
     _GDIPlus_Shutdown()
 EndFunc
+
+Func _TesseractWinScreenshot($win_title, $win_text, $scale = 1, $left_indent = 0, $top_indent = 0, $right_indent = 0, $bottom_indent = 0)
+	$capture_filename = _TempFile($tesseract_temp_path, "~", ".tif")
+	CaptureToTIFF($win_title, $win_text, "", $capture_filename, $scale, $left_indent, $top_indent, $right_indent, $bottom_indent)
+	Return $capture_filename
+EndFunc
+
+Func _TesseractWinTextRecognise($capture_filename, $delimiter = "", $cleanup = 1)
+	dim $aArray, $final_ocr[1]
+
+	; Perform the text recognition
+	$ocr_filename = StringLeft($capture_filename, StringLen($capture_filename) - 4)
+	$ocr_filename_and_ext = $ocr_filename & ".txt"
+
+	ShellExecuteWait(@ProgramFilesDir & "\Tesseract-OCR\tesseract.exe", $capture_filename & " " & $ocr_filename, "", "", @SW_HIDE)
+
+	; If no delimter specified, then return a string
+	if StringCompare($delimiter, "") = 0 Then
+
+		$final_ocr = FileRead($ocr_filename_and_ext)
+	Else
+		_FileReadToArray($ocr_filename_and_ext, $aArray)
+		_ArrayDelete($aArray, 0)
+
+		; Append the recognised text to a final array
+		_ArrayConcatenate($final_ocr, $aArray)
+	EndIf
+
+ 	FileDelete($ocr_filename & ".*")
+
+	; Cleanup
+	if IsArray($final_ocr) And $cleanup = 1 Then
+
+		; Cleanup the items
+		for $final_ocr_num = 1 to (UBound($final_ocr)-1)
+
+			; Remove erroneous characters
+			$final_ocr[$final_ocr_num] = StringReplace($final_ocr[$final_ocr_num], ".", "")
+			$final_ocr[$final_ocr_num] = StringReplace($final_ocr[$final_ocr_num], "'", "")
+			$final_ocr[$final_ocr_num] = StringReplace($final_ocr[$final_ocr_num], ",", "")
+			$final_ocr[$final_ocr_num] = StringStripWS($final_ocr[$final_ocr_num], 3)
+		Next
+
+		; Remove duplicate and blank items
+		for $each in $final_ocr
+
+			$found_item = _ArrayFindAll($final_ocr, $each)
+
+			; Remove blank items
+			if IsArray($found_item) Then
+				if StringCompare($final_ocr[$found_item[0]], "") = 0 Then
+
+					_ArrayDelete($final_ocr, $found_item[0])
+				EndIf
+			EndIf
+
+			; Remove duplicate items
+			for $found_item_num = 2 to UBound($found_item)
+
+				_ArrayDelete($final_ocr, $found_item[$found_item_num-1])
+			Next
+		Next
+	EndIf
+	Return $final_ocr
+EndFunc

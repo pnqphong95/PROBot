@@ -33,33 +33,36 @@ Func ProBot_TextAccepted(Const $input, Const $acceptTexts = "")
 	Return False
 EndFunc
 
-Func ProBot_SendKey($key = '')
-	If $key <> "" Then
-		Send("{" & $key &" 1}")
+Func ProBot_SendKey($key1 = '', $key2 = '')
+	If $key1 <> "" Then
+		Send("{" & $key1 &" 1}")
+		Sleep(Random(500, 1000, 1))
+	EndIf
+	If $key2 <> "" Then
+		Send("{" & $key2 &" 1}")
 		Sleep(Random(500, 1000, 1))
 	EndIf
 EndFunc
 
 Func ProBot_PickEffectiveMove(Const $aTypeCharts, Const $aUsableMoves, Const $sType1 = "", Const $sType2 = "")
 	Local $nArrayLenght= UBound($aUsableMoves)
-	Local $nSelectedMove = Random(0, $nArrayLenght - 1, 1)
-	Local $nSelectedMoveDamage = 0
+	Local $nSelectedMove = -1, $nSelectedMoveDamage = 0
 	If $sType1 = "" Then
 		; If opponent doesn't have type 1, skip all evaluations.
 		Return $nSelectedMove
 	EndIf 
 	
 	; aTypeCharts[chart_id, effectiveness]
-	; aUsableMoves[name, point, key, id, type, power, accuracy]
+	; aUsableMoves[name, point, key, id, type, power, accuracy, disabled_by_user]
 	For $i = 0 To $nArrayLenght - 1
-		If $aUsableMoves[$i][1] = 0 Then
+		If $aUsableMoves[$i][1] = 0 Or Number($aUsableMoves[$i][7]) = 1 Then
 			; If move point = 0, skip other evaluations.
+			; If move disabled by user, skip other evaluations.
 			ContinueLoop
 		EndIf
 
 		; Lookup effectiveness of move against type 1
 		Local $nEffectiveness = 0.5
-		_ArrayDisplay($aTypeCharts)
 		Local $nFoundType1 = _ArrayBinarySearch($aTypeCharts, StringLower($aUsableMoves[$i][4] & ";" & $sType1))
 		If Not @error Then
 			$nEffectiveness = Number($aTypeCharts[$nFoundType1][1])
@@ -78,8 +81,6 @@ Func ProBot_PickEffectiveMove(Const $aTypeCharts, Const $aUsableMoves, Const $sT
 			EndIf
 		EndIf
 
-		
-
 		; Calculate damage based on effectiveness and power
 		Local $nMovePower = Number($aUsableMoves[$i][5])
 		Local $nCurrentMoveDamage = $nMovePower * $nEffectiveness
@@ -89,14 +90,13 @@ Func ProBot_PickEffectiveMove(Const $aTypeCharts, Const $aUsableMoves, Const $sT
 		EndIf
 		
 	Next
-	ProBot_Log("Selected move --> " & $aUsableMoves[$nSelectedMove][0] & " (point = " & $aUsableMoves[$nSelectedMove][1] _
-		& ", type = " & $aUsableMoves[$nSelectedMove][4] & ", damage = " & $nSelectedMoveDamage & ")")
 	Return $nSelectedMove
 EndFunc
 
 Func ProBot_CreateUsableMoveArray(Const $aMoveData, Const $sPokemonMoveRaw, Const $sMovePointRaw)
-	; aUsableMoves[name, point, key, id, type, power, accuracy]
-	Local $aUsableMoves[0][7]
+	; aMoveData[id, type, power, accuracy, disabled_by_user]
+	; aUsableMoves[name, point, key, id, type, power, accuracy, disabled_by_user]
+	Local $aUsableMoves[0][8]
 	Local $aPokemonMoves = StringSplit(StringStripWS($sPokemonMoveRaw, 7), @LF, 1)
 	Local $aMovePoints = StringSplit(StringStripWS($sMovePointRaw, 7), @LF, 1)
 	For $i = 1 To _Min($aPokemonMoves[0], $aMovePoints[0])
@@ -105,10 +105,13 @@ Func ProBot_CreateUsableMoveArray(Const $aMoveData, Const $sPokemonMoveRaw, Cons
 			Local $sMoveId = StringLower(StringReplace($aPokemonMoves[$i], " ", "-"))
 			Local $nFoundMove = _ArrayBinarySearch($aMoveData, $sMoveId)
 			If Not @error Then
-				Local $item[1][7] = [[$aPokemonMoves[$i], $nPoint, $i, _
+				If $aMoveData[$nFoundMove][4] <> 1 Then
+					; Only add move that not disabled by user
+					Local $item[1][8] = [[$aPokemonMoves[$i], $nPoint, $i, _
 					$aMoveData[$nFoundMove][0], $aMoveData[$nFoundMove][1], _
-					$aMoveData[$nFoundMove][2], $aMoveData[$nFoundMove][3]]]
-				_ArrayAdd($aUsableMoves, $item)
+					$aMoveData[$nFoundMove][2], $aMoveData[$nFoundMove][3], $aMoveData[$nFoundMove][4]]]
+					_ArrayAdd($aUsableMoves, $item)
+				EndIf 
 			Else
 				Local $item[1][3] = [[$aPokemonMoves[$i], $nPoint, $i]]
 				_ArrayAdd($aUsableMoves, $item)

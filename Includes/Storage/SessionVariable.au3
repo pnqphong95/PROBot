@@ -19,11 +19,15 @@ Global Const $RT_RAW_LOG = "bot.session.runtime.battle.raw-log"
 Global Const $RT_RECOGNISED_OPPONENT = "bot.session.runtime.battle.recogised-opponent"
 Global Const $RT_IS_ACTIONABLE = "bot.session.runtime.battle.actionable"
 Global Const $RT_ACTION = "bot.session.runtime.battle.action"
-Global Const $RT_STATE = "bot.session.runtime.state"
+Global Const $RT_ERROR_CODE = "bot.session.runtime.error-code"
+Global Const $RT_ERROR_CODE_LEADING_NO_USABLE_MOVE = "error_leading_no_usable_move"
+Global Const $RT_ERROR_CODE_FROZEN_BATTLE = "error_frozen_battle"
 Global Const $RT_OPPONENT_LOG_ENTRIES_COUNTER = "bot.session.runtime.opponent-log-entries-counter"
 Global Const $RT_OPPONENT_LOG_ENTRIES_THRESHOLD = "bot.session.runtime.opponent-log-entries-threshold"
+Global Const $RT_LAST_BATTLE_END_TIME = "bot.session.runtime.last-battle-end-time"
 Global $SessionVariables = ObjCreate("Scripting.Dictionary")
 Global $OpponentLogEntries = ObjCreate("Scripting.Dictionary")
+Global $PartyData = ObjCreate("Scripting.Dictionary")
 
 ; Static config from config file
 $SessionVariables.Item($SESSION_MODE) = ""
@@ -48,6 +52,7 @@ $SessionVariables.Item($RT_RECOGNISED_OPPONENT) = ""
 $SessionVariables.Item($RT_IS_ACTIONABLE) = False
 $SessionVariables.Item($RT_ACTION) = ""
 $SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) = 0
+$SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = 0
 
 Func ProBot_LoadSessionVariables(Const $file)
 	If Not FileExists($file) Then

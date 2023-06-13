@@ -1,12 +1,7 @@
 #include-once
-#include <Date.au3>
-#include "Storage\SessionVariable.au3"
-#include "Storage\BotSetting.au3"
-#include "Functions\Constant.au3"
-#include "Functions\GameClientFunc.au3"
+#include "HandlerHelper.au3"
 #include "Functions\Logger.au3"
 #include "Functions\Reporter.au3"
-#include "Functions\WinFunc.au3"
 
 Func ProBot_CaptureGameState(Const $hwnd)
 	$SessionVariables.Item($RT_ON_BATTLE_START) = False
@@ -36,6 +31,7 @@ EndFunc
 
 Func ProBot_EvaluateGameState(Const $hwnd)
 	If $SessionVariables.Item($RT_ON_BATTLE_START) Then
+		ProBot_Log("Battle start..")
 		$SessionVariables.Item($RT_ACTION) = $RT_ACTION_RUNAWAY
 		Local $detected = $SessionVariables.Item($RT_RECOGNISED_OPPONENT)
 		Switch ($SessionVariables.Item($SESSION_MODE))
@@ -59,62 +55,6 @@ Func ProBot_EvaluateGameState(Const $hwnd)
 	EndIf
 EndFunc
 
-Func ProBot_WaitActionReady(Const $hwnd, Const $interval = 5, Const $waitSec = 60)
-	Local $elapsed = 0, $timer = TimerInit()
-	While 1
-		Sleep($interval * 1000)
-		$SessionVariables.Item($RT_ON_BATTLE_VISIBLE) = False
-		$SessionVariables.Item($RT_IS_ACTIONABLE) = False
-		If Not ProBot_IsBattleDialogVisible($hwnd) Then
-			ExitLoop
-		EndIf
-		$SessionVariables.Item($RT_ON_BATTLE_VISIBLE) = True
-		If ProBot_IsBattleActionReady($hwnd) Then
-			$SessionVariables.Item($RT_IS_ACTIONABLE) = True
-			ExitLoop
-		EndIf
-		$elapsed = TimerDiff($timer)
-		If $elapsed > $waitSec * 1000 Then
-			ExitLoop
-		EndIf
-	WEnd
-EndFunc
-
-Func ProBot_IsBattleDialogVisible($hwnd)
-	Local $left = $Settings.Item($BATTLE_INDICATOR_LEFT)
-	Local $top = $Settings.Item($BATTLE_INDICATOR_TOP)
-	Local $right = $Settings.Item($BATTLE_INDICATOR_RIGHT)
-	Local $bottom = $Settings.Item($BATTLE_INDICATOR_BOTTOM)
-	Local $color = $Settings.Item($BATTLE_INDICATOR_COLOR_HEX)
-	Local $visible = ProBot_IsPixelColorDisplayed($hwnd, $left, $top, $right, $bottom, $color)
-	Return $visible
-EndFunc
-
-Func ProBot_IsBattleActionReady($hwnd)
-	Local $left = $Settings.Item($ACTION_INDICATOR_LEFT)
-	Local $top = $Settings.Item($ACTION_INDICATOR_TOP)
-	Local $right = $Settings.Item($ACTION_INDICATOR_RIGHT)
-	Local $bottom = $Settings.Item($ACTION_INDICATOR_BOTTOM)
-	Local $color = $Settings.Item($ACTION_INDICATOR_COLOR_HEX)
-	Return ProBot_IsPixelColorDisplayed($hwnd, $left, $top, $right, $bottom, $color, 2)
-EndFunc
-
-Func ProBot_CaptureOpponent($hwnd)
-	Local $left = $Settings.Item($TITLE_INDICATOR_LEFT)
-	Local $top = $Settings.Item($TITLE_INDICATOR_TOP)
-	Local $right = $Settings.Item($TITLE_INDICATOR_RIGHT)
-	Local $bottom = $Settings.Item($TITLE_INDICATOR_BOTTOM)
-	Return ProBot_ExtractText($hwnd, $left, $top, $right, $bottom)
-EndFunc
-
-Func ProBot_CaptureLatestLog($hwnd)
-	Local $left = $Settings.Item($LOG_INDICATOR_LEFT)
-	Local $top = $Settings.Item($LOG_INDICATOR_TOP)
-	Local $right = $Settings.Item($LOG_INDICATOR_RIGHT)
-	Local $bottom = $Settings.Item($LOG_INDICATOR_BOTTOM)
-	Return ProBot_ExtractText($hwnd, $left, $top, $right, $bottom)
-EndFunc
-
 Func ProBot_RecordOpponentLogEntry(Const $opponentRawText)
 	$SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) = Number($SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER)) + 1
 	If $OpponentLogEntries.Exists($opponentRawText) Then
@@ -133,7 +73,7 @@ Func ProBot_ReportOpponentLogEntries(Const $hwnd)
 		Local $replacedStr = StringReplace($OpponentLogEntries.Item($opponentName) & " x " & $opponentName, @LF, "")
 		$message = $message & $replacedStr & @CRLF
 	Next
-	ProBot_Notify($message, ProBot_MakeScreenshot($hwnd))
+	ProBot_Notify($message, True, ProBot_MakeScreenshot($hwnd))
 	$SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) = 0
 	$OpponentLogEntries.RemoveAll
 EndFunc

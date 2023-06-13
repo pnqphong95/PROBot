@@ -10,9 +10,11 @@
 #include "Includes\Storage\CmdLineParam.au3"
 #include "Includes\Functions\WinFunc.au3"
 #include "Includes\Functions\Logger.au3"
+#include "Includes\HandlerHelper.au3"
 #include "Includes\RtSpawnHandler.au3"
 #include "Includes\RtBattleHandler.au3"
-#include "Includes\RtActionHandler.au3"
+#include "Includes\RtAutoLevelHandler.au3"
+#include "Includes\RtAutoRunAwayHandler.au3"
 
 ; Exit when another bot instance is running
 If _Singleton(@ScriptName, 1) = 0 Then
@@ -27,6 +29,7 @@ ProBot_LoadPokemonMoves(@WorkingDir & "\GameData\moves.csv")
 ProBot_ParseCmdLineParams($CmdLine)
 ProBot_ValidateCmdLineParams()
 ProBot_LoadSessionVariables($CmdLineParams.Item("vf"))
+$SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = TimerInit()
 
 While 1
     Local $hwnd = ProBot_ClientWindow("PROClient", False)
@@ -43,9 +46,24 @@ While 1
 		If $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
 			ProBot_EvaluateGameState($hwnd)
 			ProBot_DelegateActionHandler($hwnd)
+			$SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = TimerInit()
 			ContinueLoop
 		Else
+			Local $hBattleEnd = $SessionVariables.Item($RT_LAST_BATTLE_END_TIME)
+			If $hBattleEnd And TimerDiff($hBattleEnd) > 20000 Then
+				$SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = TimerInit()
+				ProBot_CloseEvolveDialogIfAppeared($hwnd)
+			EndIf
 			ProBot_PressSpawnKey()
 		EndIf
 	EndIf
 WEnd
+
+Func ProBot_DelegateActionHandler(Const $hwnd)
+	Switch $SessionVariables.Item($RT_ACTION)
+		Case $RT_ACTION_RUNAWAY
+			ProBot_HandleAutoRunAway($hwnd)
+		Case $RT_ACTION_AUTO_LEVEL
+			ProBot_HandleAutoLevel($hwnd)
+	EndSwitch
+EndFunc
