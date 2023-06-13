@@ -19,6 +19,7 @@ Global Const $RT_RAW_LOG = "bot.session.runtime.battle.raw-log"
 Global Const $RT_RECOGNISED_OPPONENT = "bot.session.runtime.battle.recogised-opponent"
 Global Const $RT_IS_ACTIONABLE = "bot.session.runtime.battle.actionable"
 Global Const $RT_ACTION = "bot.session.runtime.battle.action"
+Global Const $RT_OUT_BATTLE_ACTION = "bot.session.runtime.out-battle.action"
 Global Const $RT_ERROR_CODE = "bot.session.runtime.error-code"
 Global Const $RT_ERROR_CODE_LEADING_NO_USABLE_MOVE = "error_leading_no_usable_move"
 Global Const $RT_ERROR_CODE_FROZEN_BATTLE = "error_frozen_battle"
@@ -53,6 +54,7 @@ $SessionVariables.Item($RT_IS_ACTIONABLE) = False
 $SessionVariables.Item($RT_ACTION) = ""
 $SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_COUNTER) = 0
 $SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = 0
+$SessionVariables.Item($RT_OUT_BATTLE_ACTION) = ""
 
 Func ProBot_LoadSessionVariables(Const $file)
 	If Not FileExists($file) Then
@@ -75,4 +77,17 @@ Func ProBot_LoadSessionVariables(Const $file)
 		;~ 	ProBot_Log($key & " = " & $newValue)
 		;~ EndIf
 	Next
+EndFunc
+
+Func ProBot_svGetPartyUsableMoves(Const $partyNumber = 0)
+	Return $PartyData.Item($partyNumber & ".aUsableMoves")
+EndFunc
+
+Func ProBot_svSetPartyUsableMoves(Const $aUsableMoves, Const $partyNumber = 0)
+	$PartyData.Item($partyNumber & ".aUsableMoves") = $aUsableMoves
+EndFunc
+
+Func ProBot_svSetNextAction(Const $nextAction, Const $errorCode = "")
+	$SessionVariables.Item($RT_ACTION) = $nextAction
+	$SessionVariables.Item($RT_ERROR_CODE) = $errorCode
 EndFunc

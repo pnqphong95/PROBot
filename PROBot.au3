@@ -22,13 +22,15 @@ If _Singleton(@ScriptName, 1) = 0 Then
 	Exit
 EndIf
 
-ProBot_LoadExternalSettings(@WorkingDir & "\Probot.ini")
-ProBot_LoadPokemonTypeData(@WorkingDir & "\GameData\pokemon_types.csv")
-ProBot_LoadPokemonTypeChartData(@WorkingDir & "\GameData\type_chart.csv")
-ProBot_LoadPokemonMoves(@WorkingDir & "\GameData\moves.csv")
-ProBot_ParseCmdLineParams($CmdLine)
-ProBot_ValidateCmdLineParams()
-ProBot_LoadSessionVariables($CmdLineParams.Item("vf"))
+Global Const $BOT_SETTING_FILE = @WorkingDir & "\Probot.ini"
+Global Const $POKEMON_TYPE_CSV = @WorkingDir & "\GameData\pokemon_types.csv"
+Global Const $TYPE_CHART_CSV = @WorkingDir & "\GameData\type_chart.csv"
+Global Const $MOVE_CSV = @WorkingDir & "\GameData\moves.csv"
+
+ProBot_LoadBotSettingFile($BOT_SETTING_FILE)
+ProBot_LoadPokemonCsvDatabase()
+ProBot_LoadCmdLineParams()
+ProBot_LoadSessionVariables($CmdLineParams.Item("script"))
 $SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = TimerInit()
 
 While 1
@@ -44,26 +46,43 @@ While 1
 		ProBot_CaptureGameState($hwnd)
 		ProBot_ReleaseSpawnKey()
 		If $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
-			ProBot_EvaluateGameState($hwnd)
-			ProBot_DelegateActionHandler($hwnd)
-			$SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = TimerInit()
+			ProBot_EvaluateBattleState($hwnd)
+			ProBot_DelegateAutoBattleHandler($hwnd)
 			ContinueLoop
 		Else
-			Local $hBattleEnd = $SessionVariables.Item($RT_LAST_BATTLE_END_TIME)
-			If $hBattleEnd And TimerDiff($hBattleEnd) > 20000 Then
-				$SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = TimerInit()
-				ProBot_CloseEvolveDialogIfAppeared($hwnd)
-			EndIf
-			ProBot_PressSpawnKey()
+			ProBot_DelegateOutBattleHandler($hwnd)
+			ContinueLoop
 		EndIf
 	EndIf
 WEnd
 
-Func ProBot_DelegateActionHandler(Const $hwnd)
+Func ProBot_DelegateAutoBattleHandler(Const $hwnd)
 	Switch $SessionVariables.Item($RT_ACTION)
 		Case $RT_ACTION_RUNAWAY
 			ProBot_HandleAutoRunAway($hwnd)
 		Case $RT_ACTION_AUTO_LEVEL
 			ProBot_HandleAutoLevel($hwnd)
 	EndSwitch
+EndFunc
+
+Func ProBot_DelegateOutBattleHandler(Const $hwnd)
+	$SessionVariables.Item($RT_OUT_BATTLE_ACTION) = $RT_OUT_BATTLE_SPAWN
+	Local $hBattleEnd = $SessionVariables.Item($RT_LAST_BATTLE_END_TIME)
+	If $hBattleEnd And TimerDiff($hBattleEnd) > 20000 Then
+		$SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = TimerInit()
+		$SessionVariables.Item($RT_OUT_BATTLE_ACTION) = $RT_OUT_BATTLE_TIME_EXCEED
+	EndIf
+
+	Switch $SessionVariables.Item($RT_OUT_BATTLE_ACTION)
+		Case $RT_OUT_BATTLE_SPAWN
+			ProBot_PressSpawnKey()
+		Case $RT_OUT_BATTLE_TIME_EXCEED
+			ProBot_CloseEvolveDialogIfAppeared($hwnd)
+	EndSwitch
+EndFunc
+
+Func ProBot_LoadPokemonCsvDatabase()
+	_btLoadPokemonTypeData($POKEMON_TYPE_CSV)
+	_btLoadPokemonTypeChartData($TYPE_CHART_CSV)
+	_btLoadPokemonMoves($MOVE_CSV)
 EndFunc

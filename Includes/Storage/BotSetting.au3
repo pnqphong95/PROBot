@@ -44,11 +44,12 @@ Global Const $ACTION_KEY_6 = "bot.battle.action.keybinding6"
 Global Const $REPORT_BOT_URL = "bot.report.telegram-bot-url"
 Global Const $REPORT_CHAT_ID = "bot.report.telegram-chat-id"
 Global $Settings = ObjCreate("Scripting.Dictionary")
+Global $CmdLineParams = ObjCreate("Scripting.Dictionary")
 
 ;Global pokemon data from CSV
-Global $DataPokemonTypes
-Global $DataTypeChart
-Global $DataPokemonMoves
+Global $aPokemonTypeData
+Global $aTypeChartData
+Global $aPokemonMoveData
 
 ;Default battle indicator coordinators
 $Settings.Item($BATTLE_INDICATOR_LEFT) = 360
@@ -106,7 +107,7 @@ $Settings.Item($ACTION_KEY_4) = "V"
 $Settings.Item($REPORT_BOT_URL) = ""
 $Settings.Item($REPORT_CHAT_ID) = ""
 
-Func ProBot_LoadExternalSettings(Const $file)
+Func ProBot_LoadBotSettingFile(Const $file)
 	If Not FileExists($file) Then
 		ProBot_Log("Use default setting, external file not exist " & $file)
         For $key In $Settings
@@ -132,22 +133,22 @@ Func ProBot_LoadExternalSettings(Const $file)
 	Next
 EndFunc
 
-Func ProBot_LoadPokemonTypeData(Const $pokemonTypeCsv)
-	$DataPokemonTypes = _LoadCsvToArray($pokemonTypeCsv)
-	_ArraySort($DataPokemonTypes, 0, 0, 0, 1)
+Func _btLoadPokemonTypeData(Const $pokemonTypeCsv)
+	$aPokemonTypeData = _btLoadCsvToArray($pokemonTypeCsv)
+	_ArraySort($aPokemonTypeData, 0, 0, 0, 1)
 EndFunc
 
-Func ProBot_LoadPokemonTypeChartData(Const $typeChartCsv)
-	$DataTypeChart = _LoadCsvToArray($typeChartCsv)
-	_ArraySort($DataTypeChart)
+Func _btLoadPokemonTypeChartData(Const $typeChartCsv)
+	$aTypeChartData = _btLoadCsvToArray($typeChartCsv)
+	_ArraySort($aTypeChartData)
 EndFunc
 
-Func ProBot_LoadPokemonMoves(Const $moveCsv)
-	$DataPokemonMoves= _LoadCsvToArray($moveCsv)
-	_ArraySort($DataPokemonMoves)
+Func _btLoadPokemonMoves(Const $moveCsv)
+	$aPokemonMoveData= _btLoadCsvToArray($moveCsv)
+	_ArraySort($aPokemonMoveData)
 EndFunc
 
-Func _LoadCsvToArray(Const $csvPath)
+Func _btLoadCsvToArray(Const $csvPath)
 	Local $csvFile = FileOpen($csvPath)
 	If $csvFile = -1 Then
 		ConsoleWrite("Unable to open file " & $csvPath)

@@ -15,6 +15,7 @@ Func ProBot_CaptureGameState(Const $hwnd)
 		If $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
 			$SessionVariables.Item($RT_ON_BATTLE_VISIBLE) = False
 			$SessionVariables.Item($RT_ON_BATTLE_STOP) = True
+			$SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = TimerInit()
 			ProBot_ReportOpponentLogEntries($hwnd)
 		EndIf
 	EndIf
@@ -29,7 +30,7 @@ Func ProBot_CaptureGameState(Const $hwnd)
 	EndIf
 EndFunc
 
-Func ProBot_EvaluateGameState(Const $hwnd)
+Func ProBot_EvaluateBattleState(Const $hwnd)
 	If $SessionVariables.Item($RT_ON_BATTLE_START) Then
 		ProBot_Log("Battle start..")
 		$SessionVariables.Item($RT_ACTION) = $RT_ACTION_RUNAWAY
@@ -43,6 +44,9 @@ Func ProBot_EvaluateGameState(Const $hwnd)
 			Case $RT_ACTION_AUTO_LEVEL
 				If ProBot_TextAccepted($detected, $SessionVariables.Item($AUTO_FIGHT_LIST)) Then
 					$SessionVariables.Item($RT_ACTION) = $RT_ACTION_AUTO_LEVEL
+				ElseIf ProBot_TextAccepted($detected, $SessionVariables.Item($AUTO_CAUGHT_LIST)) Then
+					ProBot_Notify("Found 1 " & $detected & " while leveling! Please catch it.", True)
+					Exit
 				EndIf
 			Case $RT_ACTION_AUTO_EV_TRAIN
 				If ProBot_TextAccepted($detected, $SessionVariables.Item($AUTO_FIGHT_LIST)) Then
