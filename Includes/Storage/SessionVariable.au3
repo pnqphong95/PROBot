@@ -3,6 +3,7 @@
 
 Global Const $SESSION_MODE = "bot.session.mode"
 Global Const $REPORT_ENABLE = "bot.session.report.enable"
+Global Const $LATEST_MESSAGE = "bot.session.battle.latest-message"
 Global Const $AUTO_CAUGHT_LIST = "bot.session.battle.auto-caught-list"
 Global Const $AUTO_FIGHT_LIST = "bot.session.battle.auto-fight-list"
 Global Const $SYNC_POKEMON_SLOT_NUMBER = "bot.session.battle.sync-slot-number"
@@ -10,6 +11,7 @@ Global Const $FALSE_SWIPE_POKEMON_SLOT_NUMBER = "bot.session.battle.fs-slot-numb
 Global Const $SPAWN_INITIAL_DIRECTION = "bot.session.spawn.direction"
 Global Const $SPAWN_MIN = "bot.session.spawn.min"
 Global Const $SPAWN_MAX = "bot.session.spawn.max"
+Global Const $USER_MANUAL_CATCH = "bot.session.battle.user-manual-catch"
 Global Const $RT_SPAWN_LAST_DIRECTION = "bot.session.runtime.spawn.last-direction"
 Global Const $RT_ON_BATTLE_VISIBLE = "bot.session.runtime.battle.on-visible"
 Global Const $RT_ON_BATTLE_START = "bot.session.runtime.battle.on-start"
@@ -20,12 +22,15 @@ Global Const $RT_RECOGNISED_OPPONENT = "bot.session.runtime.battle.recogised-opp
 Global Const $RT_IS_ACTIONABLE = "bot.session.runtime.battle.actionable"
 Global Const $RT_ACTION = "bot.session.runtime.battle.action"
 Global Const $RT_OUT_BATTLE_ACTION = "bot.session.runtime.out-battle.action"
-Global Const $RT_ERROR_CODE = "bot.session.runtime.error-code"
-Global Const $RT_ERROR_CODE_LEADING_NO_USABLE_MOVE = "error_leading_no_usable_move"
-Global Const $RT_ERROR_CODE_FROZEN_BATTLE = "error_frozen_battle"
 Global Const $RT_OPPONENT_LOG_ENTRIES_COUNTER = "bot.session.runtime.opponent-log-entries-counter"
 Global Const $RT_OPPONENT_LOG_ENTRIES_THRESHOLD = "bot.session.runtime.opponent-log-entries-threshold"
 Global Const $RT_LAST_BATTLE_END_TIME = "bot.session.runtime.last-battle-end-time"
+Global Const $RT_ERROR_CODE = "bot.session.runtime.error-code"
+Global Const $RT_ERROR_CODE_LEADING_NO_USABLE_MOVE = "error_leading_no_usable_move"
+Global Const $RT_ERROR_CODE_FROZEN_BATTLE = "error_frozen_battle"
+Global Const $RT_ERROR_CODE_MANUAL_REQUIRED = "error_manual_required"
+
+; Global dictionaries
 Global $SessionVariables = ObjCreate("Scripting.Dictionary")
 Global $OpponentLogEntries = ObjCreate("Scripting.Dictionary")
 Global $PartyData = ObjCreate("Scripting.Dictionary")
@@ -33,6 +38,7 @@ Global $PartyData = ObjCreate("Scripting.Dictionary")
 ; Static config from config file
 $SessionVariables.Item($SESSION_MODE) = ""
 $SessionVariables.Item($REPORT_ENABLE) = 1
+$SessionVariables.Item($LATEST_MESSAGE) = ""
 $SessionVariables.Item($AUTO_CAUGHT_LIST) = ""
 $SessionVariables.Item($AUTO_FIGHT_LIST) = ""
 $SessionVariables.Item($SYNC_POKEMON_SLOT_NUMBER) = 1
@@ -41,6 +47,7 @@ $SessionVariables.Item($SPAWN_INITIAL_DIRECTION) = "Left"
 $SessionVariables.Item($SPAWN_MIN) = 600
 $SessionVariables.Item($SPAWN_MAX) = 1000
 $SessionVariables.Item($RT_OPPONENT_LOG_ENTRIES_THRESHOLD) = 30
+$SessionVariables.Item($USER_MANUAL_CATCH) = 0
 
 ; Runtime variables
 $SessionVariables.Item($RT_SPAWN_LAST_DIRECTION) = ""
@@ -85,6 +92,14 @@ EndFunc
 
 Func ProBot_svSetPartyUsableMoves(Const $aUsableMoves, Const $partyNumber = 0)
 	$PartyData.Item($partyNumber & ".aUsableMoves") = $aUsableMoves
+EndFunc
+
+Func ProBot_svHasUsableMoves(Const $partyNumber = 0)
+	Return $PartyData.Item($partyNumber & ".usableMovesFlag")
+EndFunc
+
+Func ProBot_svSetHasUsableMoves(Const $partyNumber = 0, Const $hasUsableMove = True)
+	$PartyData.Item($partyNumber & ".usableMovesFlag") = $hasUsableMove
 EndFunc
 
 Func ProBot_svSetNextAction(Const $nextAction, Const $errorCode = "")

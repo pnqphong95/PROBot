@@ -17,8 +17,8 @@ Func ProBot_PokemonExtractName(Const $rawText)
 	EndIf
 EndFunc
 
-Func ProBot_TextAccepted(Const $input, Const $acceptTexts = "")
-	If $acceptTexts = "" Then
+Func ProBot_TextAccepted(Const $input, Const $acceptTexts = "", Const $acceptEmptyList = False)
+	If $acceptEmptyList And $acceptTexts = "" Then
 		Return True
 	EndIf
 	If StringInStr($acceptTexts, $input) Then
@@ -46,12 +46,7 @@ EndFunc
 
 Func ProBot_PickEffectiveMove(Const $aTypeCharts, Const $aUsableMoves, Const $sType1 = "", Const $sType2 = "")
 	Local $nArrayLenght= UBound($aUsableMoves)
-	Local $nSelectedMove = -1, $nSelectedMoveDamage = 0
-	If $sType1 = "" Then
-		; If opponent doesn't have type 1, skip all evaluations.
-		Return $nSelectedMove
-	EndIf 
-	
+	Local $nSelectedMove = -1, $nSelectedMoveDamage = 0	
 	; aTypeCharts[chart_id, effectiveness]
 	; aUsableMoves[name, point, key, id, type, power, accuracy, disabled_by_user]
 	For $i = 0 To $nArrayLenght - 1
@@ -60,12 +55,21 @@ Func ProBot_PickEffectiveMove(Const $aTypeCharts, Const $aUsableMoves, Const $sT
 			; If move disabled by user, skip other evaluations.
 			ContinueLoop
 		EndIf
+		
+		If $sType1 = "" And $sType2 = "" And Number($aUsableMoves[$i][5]) > $nSelectedMoveDamage Then
+			; If not provide which type to be against, select move highest power
+			$nSelectedMove = $i
+			$nSelectedMoveDamage = Number($aUsableMoves[$i][5])
+			ContinueLoop
+		EndIf
 
 		; Lookup effectiveness of move against type 1
 		Local $nEffectiveness = 0.5
-		Local $nFoundType1 = _ArrayBinarySearch($aTypeCharts, StringLower($aUsableMoves[$i][4] & ";" & $sType1))
-		If Not @error Then
-			$nEffectiveness = Number($aTypeCharts[$nFoundType1][1])
+		If $sType1 <> "" Then
+			Local $nFoundType1 = _ArrayBinarySearch($aTypeCharts, StringLower($aUsableMoves[$i][4] & ";" & $sType1))
+			If Not @error Then
+				$nEffectiveness = Number($aTypeCharts[$nFoundType1][1])
+			EndIf
 		EndIf
 		
 		; If not effective against type 1, then verify against type 2
@@ -105,8 +109,8 @@ Func ProBot_CreateUsableMoveArray(Const $aMoveData, Const $sPokemonMoveRaw, Cons
 			Local $sMoveId = StringLower(StringReplace($aPokemonMoves[$i], " ", "-"))
 			Local $nFoundMove = _ArrayBinarySearch($aMoveData, $sMoveId)
 			If Not @error Then
-				If $aMoveData[$nFoundMove][4] <> 1 Then
-					; Only add move that not disabled by user
+				If Number($aMoveData[$nFoundMove][2]) > 0 And $aMoveData[$nFoundMove][4] <> 1 Then
+					; Only add move that have power and not disabled by user
 					Local $item[1][8] = [[$aPokemonMoves[$i], $nPoint, $i, _
 					$aMoveData[$nFoundMove][0], $aMoveData[$nFoundMove][1], _
 					$aMoveData[$nFoundMove][2], $aMoveData[$nFoundMove][3], $aMoveData[$nFoundMove][4]]]

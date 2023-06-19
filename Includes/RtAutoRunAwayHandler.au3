@@ -1,66 +1,119 @@
 #include-once
 #include "HandlerHelper.au3"
 #include "Storage\SessionVariable.au3"
+#include "Functions\Constant.au3"
 #include "Functions\GameClientFunc.au3"
 #include "Functions\Logger.au3"
 #include "Functions\Reporter.au3"
 
 Func ProBot_HandleAutoRunAway(Const $hwnd)
+	If $SessionVariables.Item($RT_ERROR_CODE) Then
+		; Special case of run away
+		_HandleAutoRunAwayWithError($hwnd)
+		ProBot_svSetNextAction("")
+		Return
+	EndIf
+		
+	ProBot_WaitActionReady($hwnd, 0.5)
+	If Not $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
+		; When battle suddenly close
+		ProBot_svSetNextAction("")
+		Return
+	EndIf
+
+	If Not $SessionVariables.Item($RT_IS_ACTIONABLE) Then
+		ProBot_Log("Battle not ready to press run away, please take action.")
+		ProBot_Notify("Battle not ready to press run away, please take action.", True)
+		Exit
+	EndIf
+
+	; Shiny check before run away
+	; Check pokemon if not owned
+	ProBot_SendKey($Settings.Item($ACTION_KEY_4))
+	ProBot_svSetNextAction("")
+	Return
+EndFunc
+
+Func _HandleAutoRunAwayWithError(Const $hwnd)
 	Switch ($SessionVariables.Item($RT_ERROR_CODE))
 		Case $RT_ERROR_CODE_LEADING_NO_USABLE_MOVE
-			ProBot_Notify("WARNING! Leading pokemon have no usable move, closing bot..", True)
-			Exit
+			_TryRunAwayNoUsableMove($hwnd)
 		Case $RT_ERROR_CODE_FROZEN_BATTLE
-			; Try to switch on an usable party
-			Local $nUsableParty, $nLastUsableParty
-			While 1
-				$nUsableParty = ProBot_GetFirstUsableParty($hwnd)
-				If Not $nUsableParty Or $nUsableParty < 0 Or $nUsableParty > 5 Then
-					ProBot_Notify("WARNING! Don't have usable pokemon to switch on.")
-					ExitLoop
-				EndIf
-
-				If $nUsableParty = $nLastUsableParty Then
-					ProBot_Notify("WARNING! Unable to recover from frozen battle, closing bot..", True)
-					Exit
-				EndIf
-
-				$nLastUsableParty = $nUsableParty
-				ProBot_SendKey(ProBot_KeyBinding($nUsableParty + 1))
-				ProBot_WaitActionReady($hwnd)
-				ProBot_Log("Switched on usable pokemon " & $nUsableParty + 1)
-				If Not $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
-					ProBot_svSetNextAction("")
-					Return
-				EndIf
-
-				If $SessionVariables.Item($RT_IS_ACTIONABLE) Then
-					ProBot_Log("Battle recovered from frozen, try to run away..")
-					ProBot_SendKey($Settings.Item($ACTION_KEY_4))
-					ProBot_WaitActionReady($hwnd)
-					If Not $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
-						ProBot_Log("Run away from frozen battle..")
-						ProBot_svSetNextAction("")
-						Return
-					EndIf
-				EndIf
-			WEnd
+			; Handle pokemon get faint while doing battle
+			_TryRunAwayFrozenBattle($hwnd)
+		Case $RT_ERROR_CODE_MANUAL_REQUIRED
+			Exit
 	EndSwitch
+EndFunc
 
-	If Not $SessionVariables.Item($RT_ERROR_CODE) Then
-		; Check battle ready
-		ProBot_WaitActionReady($hwnd)
-		If Not $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Or Not $SessionVariables.Item($RT_IS_ACTIONABLE) Then
-			ProBot_Notify("WARNING! Unable to auto run away, closing bot..", True)
+Func _TryRunAwayNoUsableMove(Const $hwnd)
+	ProBot_WaitActionReady($hwnd, 1, 30)
+	$SessionVariables.Item($RT_OUT_BATTLE_ACTION) = $RT_OUT_BATTLE_SWAP_USABLE_LEAD
+	If Not $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
+		ProBot_svSetNextAction("")
+		Return
+	EndIf
+
+	If Not $SessionVariables.Item($RT_IS_ACTIONABLE) Then
+		Exit
+	EndIf
+
+	; Still in battle, try to run away
+	ProBot_SendKey($Settings.Item($ACTION_KEY_4))
+	ProBot_svSetNextAction("")
+	Return
+EndFunc
+
+Func _TryRunAwayFrozenBattle(Const $hwnd)
+	Local $nFirstAliveParty
+	Local $dSwitchedParties = ObjCreate("Scripting.Dictionary")
+	While 1
+		; Try to switch on an alive party
+		$nFirstAliveParty = Number(ProBot_GetFirstAliveParty($hwnd))
+		If $nFirstAliveParty < 0 Or $nFirstAliveParty > 5 Then
+			ProBot_Log("No alive pokemon in team, please take action")
+			ProBot_Notify("No alive pokemon in team, please take action", True)
 			Exit
 		EndIf
 
-		; Shiny check before run away
-		; Check pokemon if not owned
-		ProBot_SendKey($Settings.Item($ACTION_KEY_4))
-	EndIf
-	
+		If $dSwitchedParties.Exists($nFirstAliveParty) Then
+			ProBot_Log(StringFormat("Alive pokemon %d has been switched, please take action", $nFirstAliveParty))
+			ProBot_Notify(StringFormat("Alive pokemon %d has been switched, please take action", $nFirstAliveParty), True)
+			Exit
+		EndIf
 
-	ProBot_svSetNextAction("")
-	Return
+		ProBot_SendKey(ProBot_KeyBinding($nFirstAliveParty + 1))
+		ProBot_WaitActionReady($hwnd)
+		$dSwitchedParties.Item($nFirstAliveParty) = True
+
+		If Not $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
+			; When battle suddenly close
+			ProBot_Log(StringFormat("Battle suddenly close after switch alive pokemon %d.", $nFirstAliveParty))
+			ProBot_svSetNextAction("")
+			Return
+		EndIf
+
+		If Not $SessionVariables.Item($RT_IS_ACTIONABLE) Then
+			ProBot_Log(StringFormat("Battle not ready after switch alive pokemon %d, please take action.", $nFirstAliveParty))
+			ProBot_Notify(StringFormat("Battle not ready after switch alive pokemon %d, please take action.", $nFirstAliveParty), True)
+			Exit
+		EndIf
+
+		ProBot_SendKey($Settings.Item($ACTION_KEY_4))
+		ProBot_WaitActionReady($hwnd)
+		
+			
+		If Not $SessionVariables.Item($RT_ON_BATTLE_VISIBLE) Then
+			; When battle suddenly close
+			ProBot_Log("Battle close after press run away.")
+			ProBot_svSetNextAction("")
+			Return
+		EndIf
+
+		If Not $SessionVariables.Item($RT_IS_ACTIONABLE) Then
+			ProBot_Log("Battle not ready after press run away, please take action.")
+			ProBot_Notify("Battle not ready after press run away, please take action.", True)
+			Exit
+		EndIf
+	WEnd
 EndFunc

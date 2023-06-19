@@ -35,6 +35,9 @@ Global Const $FIRST_PARTY_INDICATOR_X = "bot.party.first.indicator.x"
 Global Const $FIRST_PARTY_INDICATOR_Y = "bot.party.first.indicator.y"
 Global Const $FIRST_PARTY_INDICATOR_SPACE = "bot.party.first.indicator.space"
 Global Const $FIRST_PARTY_COLOR = "bot.party.first.color"
+Global Const $OPPONENT_HEALTH_INDICATOR_X = "bot.battle.opponent-health.indicator.x"
+Global Const $OPPONENT_HEALTH_INDICATOR_Y = "bot.battle.opponent-health.indicator.y"
+Global Const $OPPONENT_HEALTH_COLOR = "bot.battle.opponent-health.color"
 Global Const $ACTION_KEY_1 = "bot.battle.action.keybinding1"
 Global Const $ACTION_KEY_2 = "bot.battle.action.keybinding2"
 Global Const $ACTION_KEY_3 = "bot.battle.action.keybinding3"
@@ -96,6 +99,11 @@ $Settings.Item($FIRST_PARTY_INDICATOR_X) = 46
 $Settings.Item($FIRST_PARTY_INDICATOR_Y) = 51
 $Settings.Item($FIRST_PARTY_INDICATOR_SPACE) = 55
 $Settings.Item($FIRST_PARTY_COLOR) = 0x504D4D
+
+;Default opponent heath bar indicator coordinators
+$Settings.Item($OPPONENT_HEALTH_INDICATOR_X) = 340
+$Settings.Item($OPPONENT_HEALTH_INDICATOR_Y) = 259
+$Settings.Item($OPPONENT_HEALTH_COLOR) = 0x00F700
 
 ;Default battle action key bindings
 $Settings.Item($ACTION_KEY_1) = "Z"

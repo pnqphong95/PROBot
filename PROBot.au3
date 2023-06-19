@@ -14,6 +14,7 @@
 #include "Includes\RtSpawnHandler.au3"
 #include "Includes\RtBattleHandler.au3"
 #include "Includes\RtAutoLevelHandler.au3"
+#include "Includes\RtAutoHuntHandler.au3"
 #include "Includes\RtAutoRunAwayHandler.au3"
 
 ; Exit when another bot instance is running
@@ -62,11 +63,12 @@ Func ProBot_DelegateAutoBattleHandler(Const $hwnd)
 			ProBot_HandleAutoRunAway($hwnd)
 		Case $RT_ACTION_AUTO_LEVEL
 			ProBot_HandleAutoLevel($hwnd)
+		Case $RT_ACTION_AUTO_HUNT
+			ProBot_HandleAutoHunt($hwnd)
 	EndSwitch
 EndFunc
 
 Func ProBot_DelegateOutBattleHandler(Const $hwnd)
-	$SessionVariables.Item($RT_OUT_BATTLE_ACTION) = $RT_OUT_BATTLE_SPAWN
 	Local $hBattleEnd = $SessionVariables.Item($RT_LAST_BATTLE_END_TIME)
 	If $hBattleEnd And TimerDiff($hBattleEnd) > 20000 Then
 		$SessionVariables.Item($RT_LAST_BATTLE_END_TIME) = TimerInit()
@@ -74,10 +76,14 @@ Func ProBot_DelegateOutBattleHandler(Const $hwnd)
 	EndIf
 
 	Switch $SessionVariables.Item($RT_OUT_BATTLE_ACTION)
-		Case $RT_OUT_BATTLE_SPAWN
-			ProBot_PressSpawnKey()
+		Case $RT_OUT_BATTLE_SWAP_USABLE_LEAD
+			ProBot_PromoteUsablePokemon($hwnd)
+			$SessionVariables.Item($RT_OUT_BATTLE_ACTION) = ""
 		Case $RT_OUT_BATTLE_TIME_EXCEED
 			ProBot_CloseEvolveDialogIfAppeared($hwnd)
+			$SessionVariables.Item($RT_OUT_BATTLE_ACTION) = ""
+		Case Else
+			ProBot_PressSpawnKey()
 	EndSwitch
 EndFunc
 

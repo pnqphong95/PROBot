@@ -361,7 +361,7 @@ func _TesseractWinCapture($win_title, $win_text = "", $get_last_capture = 0, $de
 		GUIDelete()
 	EndIf
 
-	FileDelete($ocr_filename & ".*")
+	;FileDelete($ocr_filename & ".*")
 
 	; Cleanup
 	if IsArray($final_ocr) And $cleanup = 1 Then
